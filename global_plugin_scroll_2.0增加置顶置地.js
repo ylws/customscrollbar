@@ -20,7 +20,8 @@ $.fn.shineonScroll = function(options,fn)
 			"wheelval":0,//滑轮上下滚动的值，1位向下，-1位向上
 			"marginstep":10,//步长,请使用数字
 			"getfatherid":"whichscroll",//获取当前滚动区域模块id的隐藏域id
-			"scrolltop":"top"
+			"scrolltop":"top",
+			"resetinit":0//0代表不做处理，1代表重置
 		};
 		
 		var settings = $.extend({},defaults,options);
@@ -71,7 +72,20 @@ $.fn.shineonScroll = function(options,fn)
 		    ssxmove = settings.scroll_xmove,
 		    ssx     = settings.scroll_x,
 		    sms     = settings.marginstep;
-		    
+		    if(settings["resetinit"])
+		    {
+		    	if(settings["wheelxory"]=="wheely")
+		    	{
+		    		$("#"+settings["father"]+" ."+settings["soncontent"]).css("margin-top","0");
+					$("#"+settings["father"]+" ."+settings["scroll_y"]).css("top","0");
+		    	}
+		    	else if(settings["wheelxory"]=="wheelx")
+		    	{
+		    		$("#"+settings["father"]+" ."+settings["soncontent"]).css("margin-left","0");
+					$("#"+settings["father"]+" ."+settings["scroll_x"]).css("left","0");
+		    	}
+		    	return;
+		    }
 		this.scrollings=function(settings)
 		{
 			var idval="";//获取当前鼠标指向元素的id也就是settings['father']
@@ -539,9 +553,7 @@ $.fn.shineonScroll = function(options,fn)
 			this.init(settings);
 	}
 	/*
-	 * //fn
  $().shineonScroll({"father":"scrollfather1"}); 
- //css
   #scrollfather1,#scrollfather2{
 	background: rgba(230,230,230,0.5);
 	float: left;
@@ -586,7 +598,6 @@ $.fn.shineonScroll = function(options,fn)
 	width: 100%;
 	z-index: 1;
 }
-//dom
 <div class="scrollfather" id="scrollfather2">
 	<div class="scrollson">
 		123123
