@@ -17,15 +17,24 @@ $.fn.shineonScroll = function(options,fn)
 			"scroll_xmove":"scroll_xmove",//模拟滚动条x轴滚动条背景样式
 			"deloradd":"",//添加元素，删除元素参数del/add
 			"wheelxory":"wheely",//滚动类型wheelx轴，wheely轴
-			"wheelval":"",//滑轮上下滚动的值，1位向下，-1位向上
-			"marginstep":15,//步长,请使用数字
+			"wheelval":0,//滑轮上下滚动的值，1位向下，-1位向上
+			"marginstep":10,//步长,请使用数字
 			"getfatherid":"whichscroll",//获取当前滚动区域模块id的隐藏域id
-			"scrolltop":"top"//置顶、置底
+			"scrolltop":"top"
 		};
+		
 		var settings = $.extend({},defaults,options);
+		if(screen.width>=1600){
+			settings.marginstep=10;
+		}
+		else
+		{
+			settings.marginstep=5;
+		}
 		this.sets=settings;
 		this.clickfatherid="";
 		//y轴的高度计算:父元素高度-父元素的高度除以子元素总高；
+		
 		//var marginstep=15;//步长
 		var hei_father,//父元素（y轴）
 			hei_f_offhei,//父元素距离顶部高度（y轴）hei_father_offheight
@@ -62,6 +71,7 @@ $.fn.shineonScroll = function(options,fn)
 		    ssxmove = settings.scroll_xmove,
 		    ssx     = settings.scroll_x,
 		    sms     = settings.marginstep;
+		    
 		this.scrollings=function(settings)
 		{
 			var idval="";//获取当前鼠标指向元素的id也就是settings['father']
@@ -141,7 +151,6 @@ $.fn.shineonScroll = function(options,fn)
 						$("#"+sf+" ."+ssx).attr("unorbind","bind");
 					});
 					$(document).mouseup(function(e){
-						//e.preventDefault();
 						var sf            = $("#"+settings["getfatherid"]).val();;
 						$("#"+sf+" ."+ssy).attr("unorbind","unbind");
 						$("#"+sf+" ."+ssx).attr("unorbind","unbind");
@@ -233,22 +242,14 @@ $.fn.shineonScroll = function(options,fn)
 					if((hei_c_hei+hei_c_top)<=hei_father)
 					{
 						$("#"+sf+" ."+ssy).css("top",(hei_father-hei_c_hei)+"px");
-					}
-					else
-					{
-						
-					}
+					}else{}
 					//$("."+scroll_y).css("top",(hei_father-hei_c_top)+"px");
 					hei_scroll_y_height = parseInt($("#"+sf+" ."+ssy).css("top"));
 					hei_e_s_y_hei       = hei_father-hei_scrolly;
 					//计算滚动位置，子元素移动多长距离
 					hei_scrollheight    = hei_scroll_y_height*((hei_soncontent-hei_father)/hei_e_s_y_hei);
 					$("#"+sf+" ."+sonc).css("margin-top",-hei_scrollheight+"px");
-				}
-				else
-				{
-					
-				}
+				}else{}
 				if(settings.wheelxory=="wheely")
 				{
 					//执行一次mousemove事件
@@ -323,8 +324,10 @@ $.fn.shineonScroll = function(options,fn)
 					wid_e_s_wid        = wid_father-wid_scrollx;
 					//计算滚动位置，子元素移动多长距离
 					wid_scrollwidth    = wid_scroll_x_width*((wid_soncontent-wid_father)/wid_e_s_wid);
-					if(wheelval>=0)
+					
+					if(settings["wheelval"]>=0)
 					{
+						
 						if(wid_scroll_x_width==wid_e_s_wid)
 						{
 							$("#"+sf+" ."+ssx).css("left",wid_e_s_wid+"px");
@@ -349,27 +352,28 @@ $.fn.shineonScroll = function(options,fn)
 							}			
 						}	
 					}
-					else if(wheelval<0)
+					else if(settings["wheelval"]<0)
 					{
 						if(wid_scroll_x_width<=0)
 						{
 							$("#"+sf+" ."+ssx).css("left","0px");
-							$("#"+sf+" ."+sonc).css("margin-left","0px")
+							$("#"+sf+" ."+sonc).css("margin-left","0px");
 						}
 						else
 						{
 							if((wid_scroll_x_width-sms/(wid_e_s_wid/wid_e_s_wid))<=0)
 							{
-								$("#"+sf+" ."+ssy).css("top","0px");
-								$("#"+sf+" ."+sonc).css("margin-top","0px");
+								$("#"+sf+" ."+ssx).css("left","0px");
+								$("#"+sf+" ."+sonc).css("margin-left","0px");
 							}
 							else
 							{
-								$("#"+sf+" ."+ssx).css("left",(wid_scroll_x_width-sms/(wid_e_s_wid/wid_e_s_wid))+"px")
+								$("#"+sf+" ."+ssx).css("left",(wid_scroll_x_width-sms/(wid_e_s_wid/wid_e_s_wid))+"px");
 						   		 $("#"+sf+" ."+sonc).css("margin-left",(-wid_scrollwidth+sms)+"px");
 							}
 						}
 					}
+					
 				}
 			}
 			
@@ -386,7 +390,7 @@ $.fn.shineonScroll = function(options,fn)
 					$("#"+settings["getfatherid"]).val($(this).parents(".scrollfather").attr("id"));
 				});
 				sf=$("#"+settings["getfatherid"]).val();
-			    if($("#"+sf).height()<$("#"+sf).children("div").eq(0).height())
+			    if($("#"+sf).height()<$("#"+sf).children("div").eq(0).height()||$("#"+sf).width()<$("#"+sf).children("div").eq(0).width())
 				{
 					if($("#"+sf).offset()!=undefined)
 					{
@@ -446,7 +450,7 @@ $.fn.shineonScroll = function(options,fn)
 			this.touchMove=function(e) 
 			{
 				var ev    = window.event || e;
-			    ev.preventDefault();
+			    //ev.preventDefault();
 			     var father = $("#"+settings["getfatherid"]).val(),
 			     touch      = ev.touches[0], //获取第一个触点
 			     x          = Number(touch.pageX), //页面触点X坐标
@@ -479,7 +483,7 @@ $.fn.shineonScroll = function(options,fn)
 			     }
 			
 			};
-			this.touchStart=function(e) 
+			this.touchEnd=function(e) 
 			{
 				var ev    = window.event || e;
 			    ev.preventDefault();
@@ -495,9 +499,11 @@ $.fn.shineonScroll = function(options,fn)
 				this.scrollFunc(window);
 				if ((navigator.userAgent.match(/(iPhone|Android|iPad)/i)))
 				{
-					$("#"+sf).addEventListener("touchstart", _this.touchStart, false);
-					$("#"+sf).addEventListener("touchmove", _this.touchMove, false);
-					$("#"+sf).addEventListener("touchend", _this.touchEnd, false);
+					var listenid=document.getElementById(sf);
+					listenid.addEventListener("touchstart",this.touchStart, false);
+					listenid.addEventListener("touchmove",this.touchMove, false);
+					listenid.addEventListener("touchend",this.touchEnd, false);
+					
 				}
 				else
 				{
@@ -531,7 +537,6 @@ $.fn.shineonScroll = function(options,fn)
 				
 			};
 			this.init(settings);
-			
 	}
 	/*
 	 * //fn
