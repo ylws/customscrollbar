@@ -28,6 +28,9 @@ $.fn.shineonScroll = function(options,fn)
 		if(screen.width>=1600){
 			settings.marginstep=10;
 		}
+		if(screen.width==1280){
+			settings.marginstep=15;
+		}
 		else
 		{
 			settings.marginstep=5;
@@ -394,25 +397,34 @@ $.fn.shineonScroll = function(options,fn)
 		};
 		this.scrollFunc=function(e)
 			{
+				
 				var idval="";
 				var ev       = window.event || e;
 				var settings = _this.sets,
 				funx,funy,fatherx,fathery;
 			    funx         = ev.pageX;
 			    funy         = ev.pageY;
-			    $("."+settings["soncontent"]).mouseover(function(){
+			    
+			    $("."+settings["soncontent"]).mouseover(function(e){
 					$("#"+settings["getfatherid"]).val($(this).parents(".scrollfather").attr("id"));
+					funx         = e.pageX;
+			   		 funy        = e.pageY;
 				});
 				sf=$("#"+settings["getfatherid"]).val();
 			    if($("#"+sf).height()<$("#"+sf).children("div").eq(0).height()||$("#"+sf).width()<$("#"+sf).children("div").eq(0).width())
 				{
-					if($("#"+sf).offset()!=undefined)
+					if(document.getElementById(sf).offsetTop!=undefined)
 					{
 						fathery      = $("#"+sf).offset()['top'];
 					    fatherx      = $("#"+sf).offset()['left'];
+					    if(funx==undefined){
+					    	funx=fatherx;
+					    }
+					    if(funy==undefined){
+					    	funy=fathery;
+					    }
 					    if(funx>=fatherx&&funx<=(fatherx+$("#"+sf).width())&&funy>=fathery&&funy<=(fathery+$("#"+sf).height()))
 					    {		    	
-					    	
 						    if(ev.wheelDelta)
 						    {//IE/Opera/Chrome
 						    	var thisvalue = parseInt(ev.wheelDelta);
@@ -526,12 +538,73 @@ $.fn.shineonScroll = function(options,fn)
 					{//W3C
 						if(navigator.userAgent.toLowerCase().match(/firefox/) != null)
 						{
-							document.addEventListener('DOMMouseScroll',_this.scrollFunc,false);
+							document.addEventListener('DOMMouseScroll',this.scrollFunc,false);
 						}
 					    else
 					    {
-					    	window.onmousewheel=document.onmousewheel=_this.scrollFunc;//IE/Opera/Chrome/Safari
-					    }
+					    	if (navigator.userAgent.toLowerCase().match(/.(msie)/)!=null) 
+					    	{
+					    		
+					    		if(!scrollflag)//避免鼠标或者手势滑动的同事执行滚轮事件
+					    		{
+					    			window.onmousewheel=document.onmousewheel=this.scrollFunc;//IE/Opera/Chrome/Safari
+					    		}
+							    var scrollflag=false;
+							    var startx=0;
+							    var starty=0;
+								document.getElementById(sf).onmousedown=function(e){
+									document.onselectstart=function (){return false;};
+									scrollflag=true;
+									startx=e.pageX;
+									starty=e.pageY;
+								}
+								document.getElementById(sf).onmouseup=function(e){
+									if(scrollflag)
+									{	
+										var xlength=e.pageX-startx;
+										var ylength=e.pageY-starty;
+										if(Math.abs(xlength)-Math.abs(ylength)>0){
+											if(settings.wheelxory=="wheelx")
+											{
+												//x方向
+												if(xlength>=0)
+										     	{//右
+											     	 settings["wheelval"]=1;
+											    }
+										     	else
+										     	{//左
+											     	 settings["wheelval"]=-1;
+											    }
+											    _this.scrollings(settings);				
+											}							
+										}
+										else
+										{
+											if(settings.wheelxory=="wheely")
+											{
+												//y方向
+												if(ylength>0){//下
+											     	 settings["wheelval"]=1;
+											    }
+										     	else
+										     	{//上
+											     	 settings["wheelval"]=-1;
+											    }
+												_this.scrollings(settings);
+											}
+											
+										}
+									}
+									scrollflag=false;
+									document.onselectstart=null;
+								}
+						    }
+					    	else
+					    	{
+					    		window.onmousewheel=document.onmousewheel=this.scrollFunc;//IE/Opera/Chrome/Safari
+					    	}
+					    	
+						}
 					}
 				};
 				
