@@ -25,16 +25,7 @@ $.fn.shineonScroll = function(options,fn)
 		};
 		
 		var settings = $.extend({},defaults,options);
-		if(screen.width>=1600){
-			settings.marginstep=10;
-		}
-		if(screen.width==1280){
-			settings.marginstep=15;
-		}
-		else
-		{
-			settings.marginstep=5;
-		}
+
 		this.sets=settings;
 		this.clickfatherid="";
 		//y轴的高度计算:父元素高度-父元素的高度除以子元素总高；
@@ -544,6 +535,9 @@ $.fn.shineonScroll = function(options,fn)
 					    {
 					    	if (navigator.userAgent.toLowerCase().match(/.(msie)/)!=null) 
 					    	{
+					    		if(screen.width==1280){
+									settings.marginstep=200;
+								}
 					    		
 					    		if(!scrollflag)//避免鼠标或者手势滑动的同事执行滚轮事件
 					    		{
@@ -553,12 +547,15 @@ $.fn.shineonScroll = function(options,fn)
 							    var startx=0;
 							    var starty=0;
 								document.getElementById(sf).onmousedown=function(e){
-									document.onselectstart=function (){return false;};
+									var e=window.event||e;
+									document.getElementById(sf).onselectstart=function (){return false;};
 									scrollflag=true;
 									startx=e.pageX;
 									starty=e.pageY;
+									
 								}
 								document.getElementById(sf).onmouseup=function(e){
+									var e=window.event||e;
 									if(scrollflag)
 									{	
 										var xlength=e.pageX-startx;
@@ -584,11 +581,11 @@ $.fn.shineonScroll = function(options,fn)
 											{
 												//y方向
 												if(ylength>0){//下
-											     	 settings["wheelval"]=1;
+											     	 settings["wheelval"]=-1;
 											    }
 										     	else
 										     	{//上
-											     	 settings["wheelval"]=-1;
+											     	 settings["wheelval"]=1;
 											    }
 												_this.scrollings(settings);
 											}
@@ -605,6 +602,153 @@ $.fn.shineonScroll = function(options,fn)
 					    	}
 					    	
 						}
+					}
+					else
+					{
+						if (navigator.userAgent.toLowerCase().match(/.(msie)/)!=null) 
+					    	{
+					    		if(screen.width==1280){
+									settings.marginstep=200;
+								}
+					    		
+					    		if(!scrollflag)//避免鼠标或者手势滑动的同事执行滚轮事件
+					    		{
+					    			window.onmousewheel=document.onmousewheel=this.scrollFunc;//IE/Opera/Chrome/Safari
+					    		}
+							    var scrollflag=false;
+							    var startx=0;
+							    var starty=0;
+							    
+								document.getElementById(sf).onmousedown=function(e){
+									var e=window.event||e;
+									 
+									document.getElementById(sf).onselectstart=function (){return false;};
+									scrollflag=true;
+									if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([8.]+)/) != null)
+									{
+										startx=e.clientX;
+										starty=e.clientY
+									}
+									else
+									{
+										startx=e.pageX;
+										starty=e.pageY;
+									}
+									
+								}
+								document.getElementById(sf).onmousemove=function(e){
+									var e=window.event||e;
+									
+									if(scrollflag)
+									{	
+										
+										if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([8.]+)/) != null)
+										{
+											var xlength=e.clientX-startx;
+											var ylength=e.clientY-starty;
+										}
+										else
+										{
+											var xlength=e.pageX-startx;
+											var ylength=e.pageY-starty;
+										}
+										
+										
+										if(Math.abs(xlength)-Math.abs(ylength)>0){
+											if(settings.wheelxory=="wheelx")
+											{
+												wid_scroll_x_width = parseInt($("#"+sf+" ."+ssy).css("left"));
+												wid_e_s_wid = parseInt(wid_father-wid_scrollx);
+												//x方向
+												if(xlength>=0)
+										     	{//右
+											     	 settings["wheelval"]=1;
+											     	  if(parseInt($("#"+sf+" ."+sonc).css("margin-left"))>=0){
+											     	 	$("#"+sf+" ."+sonc).css("margin-left","0px");
+											     	 	$("#"+sf+" ."+ssy).css("left","0px");
+											     	 }
+											     	 else
+											     	 {
+											     	 	$("#"+sf+" ."+sonc).css("margin-left",(parseInt($("#"+sf+" ."+sonc).css("margin-left"))+Math.abs(xlength))+"px");
+											     	 	$("#"+sf+" ."+ssy).css("left",(wid_scroll_x_width+sms/((wid_soncontent-wid_father)/wid_e_s_wid))+"px");
+											     	 }
+											    }
+										     	else
+										     	{//左
+											     	 settings["wheelval"]=-1;
+											     	 if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))>=$("#"+sf+" ."+sonc).width()-$("#"+sf).width()){
+														$("#"+sf+" ."+sonc).css("margin-left",-($("#"+sf+" ."+sonc).width()-$("#"+sf).width())+"px");
+														$("#"+sf+" ."+ssy).css("left",($("#"+sf+" ."+ssymove).width()-$("#"+sf+" ."+ssy).width())+"px");
+													}
+													else
+													{
+														$("#"+sf+" ."+sonc).css("margin-left",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))-Math.abs(xlength))+"px");
+														$("#"+sf+" ."+ssy).css("left",(wid_scroll_x_width-sms/((wid_soncontent-wid_father)/wid_e_s_wid))+"px");
+													}
+											    }
+											    //_this.scrollings(settings);				
+											}							
+										}
+										else
+										{
+											hei_scroll_y_height = parseInt($("#"+sf+" ."+ssy).css("top"));
+											hei_e_s_y_hei       = parseInt(hei_father-hei_scrolly);
+											if(settings.wheelxory=="wheely")
+											{
+												//console.log(parseInt($("#"+sf+" ."+sonc).css("margin-top")))
+											
+												//y方向
+												if(ylength>0){//下
+													
+											     	 settings["wheelval"]=1;
+											     	  if(parseInt($("#"+sf+" ."+sonc).css("margin-top"))>=0){
+											     	 	$("#"+sf+" ."+sonc).css("margin-top","0px");
+											     	 	$("#"+sf+" ."+ssy).css("top","0px");
+											     	 }
+											     	 else
+											     	 {
+											     	 	$("#"+sf+" ."+sonc).css("margin-top",(parseInt($("#"+sf+" ."+sonc).css("margin-top"))+Math.abs(ylength))+"px");
+											     	 	//滚动条处理
+											     	 	//计算每1像素代表的实际距离   margintop/没1像素代表的实际距离（+-）步长
+											     	 	$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
+											     	 }
+											     	 //console.log(ylength+"---------------")	
+											    }
+										     	else
+										     	{//上
+										     		 
+											     	settings["wheelval"]=-1;
+											     	// $("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
+													if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))>=$("#"+sf+" ."+sonc).height()-$("#"+sf).height()){
+														$("#"+sf+" ."+sonc).css("margin-top",-($("#"+sf+" ."+sonc).height()-$("#"+sf).height())+"px");
+														//$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
+														$("#"+sf+" ."+ssy).css("top",($("#"+sf+" ."+ssymove).height()-$("#"+sf+" ."+ssy).height())+"px");
+													}
+													else
+													{
+														$("#"+sf+" ."+sonc).css("margin-top",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))-Math.abs(ylength))+"px");
+														$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height-sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
+													}
+											     	
+											    }
+											}
+											
+										}
+										if(window.onmousewheel||document.onmousewheel){//监听滚轮事件，如果ie有，则执行
+											_this.scrollings(settings);
+										}
+									}
+									
+								}
+								document.onmouseup=function(){
+									scrollflag=false;
+									document.onselectstart=null;
+								}
+						    }
+					    	else
+					    	{
+					    		window.onmousewheel=document.onmousewheel=this.scrollFunc;//IE/Opera/Chrome/Safari
+					    	}
 					}
 				};
 				
