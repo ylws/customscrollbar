@@ -527,6 +527,7 @@ $.fn.shineonScroll = function(options,fn)
 					/*注册事件web端*/
 					if(document.addEventListener)
 					{//W3C
+
 						if(navigator.userAgent.toLowerCase().match(/firefox/) != null)
 						{
 							document.addEventListener('DOMMouseScroll',this.scrollFunc,false);
@@ -546,52 +547,129 @@ $.fn.shineonScroll = function(options,fn)
 							    var scrollflag=false;
 							    var startx=0;
 							    var starty=0;
-								document.getElementById(sf).onmousedown=function(e){
+								document.getElementById(sf).onmousedown=function(e){ 
 									var e=window.event||e;
+									 
 									document.getElementById(sf).onselectstart=function (){return false;};
 									scrollflag=true;
-									startx=e.pageX;
-									starty=e.pageY;
+									if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(8|9).]+)/) != null)
+									{
+										startx=e.clientX;
+										starty=e.clientY
+									}
+									else
+									{
+										startx=e.pageX;
+										starty=e.pageY;
+									}
 									
 								}
-								document.getElementById(sf).onmouseup=function(e){
+								document.getElementById(sf).onmousemove=function(e){
 									var e=window.event||e;
+									
 									if(scrollflag)
 									{	
-										var xlength=e.pageX-startx;
-										var ylength=e.pageY-starty;
+										
+										if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(8|9).]+)/) != null)
+										{
+											var xlength=e.clientX-startx;
+											var ylength=e.clientY-starty;
+										}
+										else
+										{
+											var xlength=e.pageX-startx;
+											var ylength=e.pageY-starty;
+										}
+										
+										
 										if(Math.abs(xlength)-Math.abs(ylength)>0){
 											if(settings.wheelxory=="wheelx")
 											{
+												wid_scroll_x_width = parseInt($("#"+sf+" ."+ssy).css("left"));
+												wid_e_s_wid = parseInt(wid_father-wid_scrollx);
 												//x方向
 												if(xlength>=0)
 										     	{//右
 											     	 settings["wheelval"]=1;
+											     	  if(parseInt($("#"+sf+" ."+sonc).css("margin-left"))>=0){
+											     	 	$("#"+sf+" ."+sonc).css("margin-left","0px");
+											     	 	$("#"+sf+" ."+ssy).css("left","0px");
+											     	 }
+											     	 else
+											     	 {
+											     	 	$("#"+sf+" ."+sonc).css("margin-left",(parseInt($("#"+sf+" ."+sonc).css("margin-left"))+Math.abs(xlength))+"px");
+											     	 	$("#"+sf+" ."+ssy).css("left",(wid_scroll_x_width+sms/((wid_soncontent-wid_father)/wid_e_s_wid))+"px");
+											     	 }
 											    }
 										     	else
 										     	{//左
 											     	 settings["wheelval"]=-1;
+											     	 if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))>=$("#"+sf+" ."+sonc).width()-$("#"+sf).width()){
+														$("#"+sf+" ."+sonc).css("margin-left",-($("#"+sf+" ."+sonc).width()-$("#"+sf).width())+"px");
+														$("#"+sf+" ."+ssy).css("left",($("#"+sf+" ."+ssymove).width()-$("#"+sf+" ."+ssy).width())+"px");
+													}
+													else
+													{
+														$("#"+sf+" ."+sonc).css("margin-left",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))-Math.abs(xlength))+"px");
+														$("#"+sf+" ."+ssy).css("left",(wid_scroll_x_width-sms/((wid_soncontent-wid_father)/wid_e_s_wid))+"px");
+													}
 											    }
-											    _this.scrollings(settings);				
+											    //_this.scrollings(settings);				
 											}							
 										}
 										else
 										{
+											hei_scroll_y_height = parseInt($("#"+sf+" ."+ssy).css("top"));
+											hei_e_s_y_hei       = parseInt(hei_father-hei_scrolly);
 											if(settings.wheelxory=="wheely")
 											{
+												//console.log(parseInt($("#"+sf+" ."+sonc).css("margin-top")))
+											
 												//y方向
 												if(ylength>0){//下
-											     	 settings["wheelval"]=-1;
+
+													
+											     	 settings["wheelval"]=1;
+											     	  if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))>=hei_soncontent-hei_father){
+											     	 	$("#"+sf+" ."+sonc).css("margin-top",(hei_soncontent-hei_father)+"px");
+											     	 	$("#"+sf+" ."+ssy).css("top",(hei_father-$("#"+sf+" ."+ssy).height())+"px");
+											     	 }
+											     	 else
+											     	 {
+											     	 	$("#"+sf+" ."+sonc).css("margin-top",(parseInt($("#"+sf+" ."+sonc).css("margin-top"))+Math.abs(ylength))+"px");
+											     	 	//滚动条处理
+											     	 	//计算每1像素代表的实际距离   margintop/没1像素代表的实际距离（+-）步长
+											     	 	$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
+											     	 }
+											     	 //console.log(ylength+"---------------")	
 											    }
 										     	else
 										     	{//上
-											     	 settings["wheelval"]=1;
+										     		 
+											     	settings["wheelval"]=-1;
+											     	// $("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
+													if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))>=$("#"+sf+" ."+sonc).height()-$("#"+sf).height()){
+														$("#"+sf+" ."+sonc).css("margin-top",-($("#"+sf+" ."+sonc).height()-$("#"+sf).height())+"px");
+														//$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
+														$("#"+sf+" ."+ssy).css("top",($("#"+sf+" ."+ssymove).height()-$("#"+sf+" ."+ssy).height())+"px");
+													}
+													else
+													{
+														$("#"+sf+" ."+sonc).css("margin-top",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))-Math.abs(ylength))+"px");
+														$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height-sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
+													}
+											     	
 											    }
-												_this.scrollings(settings);
 											}
 											
 										}
+										if(window.onmousewheel||document.onmousewheel){//监听滚轮事件，如果ie有，则执行
+											_this.scrollings(settings);
+										}
 									}
+									
+								}
+								document.onmouseup=function(){
 									scrollflag=false;
 									document.onselectstart=null;
 								}
@@ -618,13 +696,12 @@ $.fn.shineonScroll = function(options,fn)
 							    var scrollflag=false;
 							    var startx=0;
 							    var starty=0;
-							    
-								document.getElementById(sf).onmousedown=function(e){
+								document.getElementById(sf).onmousedown=function(e){ 
 									var e=window.event||e;
 									 
 									document.getElementById(sf).onselectstart=function (){return false;};
 									scrollflag=true;
-									if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([8.]+)/) != null)
+									if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(8|9|10).]+)/) != null)
 									{
 										startx=e.clientX;
 										starty=e.clientY
@@ -642,7 +719,7 @@ $.fn.shineonScroll = function(options,fn)
 									if(scrollflag)
 									{	
 										
-										if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([8.]+)/) != null)
+										if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(8|9|10).]+)/) != null)
 										{
 											var xlength=e.clientX-startx;
 											var ylength=e.clientY-starty;
