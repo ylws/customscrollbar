@@ -21,7 +21,8 @@ $.fn.shineonScroll = function(options,fn)
 			"marginstep":10,//步长,请使用数字
 			"getfatherid":"whichscroll",//获取当前滚动区域模块id的隐藏域id
 			"scrolltop":"top",
-			"resetinit":0//0代表不做处理，1代表重置
+			"resetinit":0,//0代表不做处理，1代表重置
+			
 		};
 		
 		var settings = $.extend({},defaults,options);
@@ -395,7 +396,6 @@ $.fn.shineonScroll = function(options,fn)
 				funx,funy,fatherx,fathery;
 			    funx         = ev.pageX;
 			    funy         = ev.pageY;
-			    
 			    $("."+settings["soncontent"]).mouseover(function(e){
 					$("#"+settings["getfatherid"]).val($(this).parents(".scrollfather").attr("id"));
 					funx         = e.pageX;
@@ -420,7 +420,8 @@ $.fn.shineonScroll = function(options,fn)
 						    {//IE/Opera/Chrome
 						    	var thisvalue = parseInt(ev.wheelDelta);
 						    	settings["father"]=sf;
-								if(thisvalue>=0)
+						    	console.log(thisvalue)
+								if(thisvalue>0)
 								{
 									
 									settings["wheelval"]=-1;
@@ -536,9 +537,7 @@ $.fn.shineonScroll = function(options,fn)
 					    {
 					    	if (navigator.userAgent.toLowerCase().match(/.(msie)/)!=null) 
 					    	{
-					    		if(screen.width==1280){
-									settings.marginstep=200;
-								}
+					    		settings.marginstep=200;
 					    		
 					    		if(!scrollflag)//避免鼠标或者手势滑动的同事执行滚轮事件
 					    		{
@@ -552,7 +551,7 @@ $.fn.shineonScroll = function(options,fn)
 									 
 									document.getElementById(sf).onselectstart=function (){return false;};
 									scrollflag=true;
-									if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(8|9).]+)/) != null)
+									if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([9.]+)/) != null)
 									{
 										startx=e.clientX;
 										starty=e.clientY
@@ -570,7 +569,7 @@ $.fn.shineonScroll = function(options,fn)
 									if(scrollflag)
 									{	
 										
-										if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(8|9).]+)/) != null)
+										if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([9.]+)/) != null)
 										{
 											var xlength=e.clientX-startx;
 											var ylength=e.clientY-starty;
@@ -628,11 +627,10 @@ $.fn.shineonScroll = function(options,fn)
 												//y方向
 												if(ylength>0){//下
 
-													
 											     	 settings["wheelval"]=1;
-											     	  if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))>=hei_soncontent-hei_father){
-											     	 	$("#"+sf+" ."+sonc).css("margin-top",(hei_soncontent-hei_father)+"px");
-											     	 	$("#"+sf+" ."+ssy).css("top",(hei_father-$("#"+sf+" ."+ssy).height())+"px");
+											     	  if(parseInt($("#"+sf+" ."+sonc).css("margin-top"))>=0){
+											     	 	$("#"+sf+" ."+sonc).css("margin-top","0px");
+											     	 	$("#"+sf+" ."+ssy).css("top","0px");
 											     	 }
 											     	 else
 											     	 {
@@ -663,9 +661,11 @@ $.fn.shineonScroll = function(options,fn)
 											}
 											
 										}
-										if(window.onmousewheel||document.onmousewheel){//监听滚轮事件，如果ie有，则执行
-											_this.scrollings(settings);
-										}
+										//新常态下不再做滚轮的监听
+//										if(window.onmousewheel||document.onmousewheel){//监听滚轮事件，如果ie有，则执行
+//											console.log("aaaaaaaaa")
+//											_this.scrollings(settings);
+//										}
 									}
 									
 								}
@@ -701,7 +701,7 @@ $.fn.shineonScroll = function(options,fn)
 									 
 									document.getElementById(sf).onselectstart=function (){return false;};
 									scrollflag=true;
-									if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(8|9|10).]+)/) != null)
+									if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(9|10).]+)/) != null)
 									{
 										startx=e.clientX;
 										starty=e.clientY
@@ -719,7 +719,7 @@ $.fn.shineonScroll = function(options,fn)
 									if(scrollflag)
 									{	
 										
-										if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(8|9|10).]+)/) != null)
+										if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(9|10).]+)/) != null)
 										{
 											var xlength=e.clientX-startx;
 											var ylength=e.clientY-starty;
@@ -810,9 +810,6 @@ $.fn.shineonScroll = function(options,fn)
 											    }
 											}
 											
-										}
-										if(window.onmousewheel||document.onmousewheel){//监听滚轮事件，如果ie有，则执行
-											_this.scrollings(settings);
 										}
 									}
 									
