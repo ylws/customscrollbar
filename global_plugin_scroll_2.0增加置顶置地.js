@@ -808,8 +808,7 @@ $.fn.shineonScroll = function(options,fn)
 													}
 											     	
 											    }
-											}
-											
+											}	
 										}
 									}
 									
@@ -817,6 +816,9 @@ $.fn.shineonScroll = function(options,fn)
 								document.onmouseup=function(){
 									scrollflag=false;
 									document.onselectstart=null;
+								}
+								if(window.onmousewheel||document.onmousewheel){//监听滚轮事件，如果ie有，则执行
+									_this.scrollings(settings);
 								}
 						    }
 					    	else
