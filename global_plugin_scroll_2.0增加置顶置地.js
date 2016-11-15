@@ -402,7 +402,7 @@ $.fn.shineonScroll = function(options,fn)
 			   		 funy        = e.pageY;
 				});
 				sf=$("#"+settings["getfatherid"]).val();
-			    if($("#"+sf).height()<$("#"+sf).children("div").eq(0).height()||$("#"+sf).width()<$("#"+sf).children("div").eq(0).width())
+			    if($("#"+sf).height()<$("#"+sf).children("div").eq(0).height()||$("#"+sf).width()<$("#"+sf).children("div").eq(0).width()||$("#"+sf).height()<$("#"+sf).children("span").eq(0).height()||$("#"+sf).width()<$("#"+sf).children("span").eq(0).width())
 				{
 					if(document.getElementById(sf).offsetTop!=undefined)
 					{
@@ -420,7 +420,7 @@ $.fn.shineonScroll = function(options,fn)
 						    {//IE/Opera/Chrome
 						    	var thisvalue = parseInt(ev.wheelDelta);
 						    	settings["father"]=sf;
-						    	console.log(thisvalue)
+						    	//console.log(thisvalue)
 								if(thisvalue>0)
 								{
 									
@@ -468,38 +468,42 @@ $.fn.shineonScroll = function(options,fn)
 			this.touchMove=function(e) 
 			{
 				var ev    = window.event || e;
-			    //ev.preventDefault();
-			     var father = $("#"+settings["getfatherid"]).val(),
-			     touch      = ev.touches[0], //获取第一个触点
-			     x          = Number(touch.pageX), //页面触点X坐标
-			     y          = Number(touch.pageY), //页面触点Y坐标
-			     thisval,ylength,xlength;
-			     ylength    = y-startY;
-			     xlength    = x-startX;
-			     if(Math.abs(ylength)>Math.abs(xlength))
-			     {
-			     	if(ylength>=0){
-				     	 settings["wheelval"]=1;
-				    }
-			     	else
-			     	{
-				     	 settings["wheelval"]=-1;
-				    }
-					_this.scrollings(settings);
-			     }
-			     else
-			     {
-			     	if(xlength>=0)
-			     	{
-				     	 settings["wheelval"]=1;
-				    }
-			     	else
-			     	{
-				     	 settings["wheelval"]=-1;
-				    }
-				    _this.scrollings(settings);
-			     }
-			
+				var father = $("#"+settings["getfatherid"]).val();
+				if($("#"+sf).height()<$("#"+sf).children("div").eq(0).height()||$("#"+sf).width()<$("#"+sf).children("div").eq(0).width()||$("#"+sf).height()<$("#"+sf).children("span").eq(0).height()||$("#"+sf).width()<$("#"+sf).children("span").eq(0).width()){
+					//ev.preventDefault();
+				     var touch  = ev.touches[0], //获取第一个触点
+				     x          = Number(touch.pageX), //页面触点X坐标
+				     y          = Number(touch.pageY), //页面触点Y坐标
+				     thisval,ylength,xlength;
+				     ylength    = y-startY;
+				     xlength    = x-startX;
+				   
+				     if(Math.abs(ylength)>Math.abs(xlength))
+				     {
+				     	if(ylength>=0){
+					     	 settings["wheelval"]=1;
+					    }
+				     	else
+				     	{
+					     	 settings["wheelval"]=-1;
+					    }
+						_this.scrollings(settings);
+				     }
+				     else
+				     {
+				     	if(xlength>=0)
+				     	{
+					     	 settings["wheelval"]=1;
+					    }
+				     	else
+				     	{
+					     	 settings["wheelval"]=-1;
+					    }
+					    _this.scrollings(settings);
+				     }		
+				}else{
+					return false;
+				}
 			};
 			this.touchEnd=function(e) 
 			{
@@ -521,7 +525,6 @@ $.fn.shineonScroll = function(options,fn)
 					listenid.addEventListener("touchstart",this.touchStart, false);
 					listenid.addEventListener("touchmove",this.touchMove, false);
 					listenid.addEventListener("touchend",this.touchEnd, false);
-					
 				}
 				else
 				{
