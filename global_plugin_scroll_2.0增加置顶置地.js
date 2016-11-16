@@ -101,7 +101,7 @@ $.fn.shineonScroll = function(options,fn)
 				wid_soncontent	= $("#"+sf+" ."+sonc).width();
 				
 				//y轴
-				if(hei_father<=hei_soncontent){
+				if(hei_father<hei_soncontent){
 					$("#"+sf+" ."+ssy).show();
 					$("#"+sf+" ."+ssymove).show();
 					hei_scrolly	= hei_father*(hei_father/hei_soncontent);
@@ -389,7 +389,6 @@ $.fn.shineonScroll = function(options,fn)
 		};
 		this.scrollFunc=function(e)
 			{
-				
 				var idval="";
 				var ev       = window.event || e;
 				var settings = _this.sets,
@@ -402,7 +401,7 @@ $.fn.shineonScroll = function(options,fn)
 			   		 funy        = e.pageY;
 				});
 				sf=$("#"+settings["getfatherid"]).val();
-			    if($("#"+sf).height()<$("#"+sf).children("div").eq(0).height()||$("#"+sf).width()<$("#"+sf).children("div").eq(0).width()||$("#"+sf).height()<$("#"+sf).children("span").eq(0).height()||$("#"+sf).width()<$("#"+sf).children("span").eq(0).width())
+			    if($("#"+sf).height()<$("#"+sf+" ."+sonc).height()||$("#"+sf).width()<$("#"+sf+" ."+sonc).width())
 				{
 					if(document.getElementById(sf).offsetTop!=undefined)
 					{
@@ -420,7 +419,6 @@ $.fn.shineonScroll = function(options,fn)
 						    {//IE/Opera/Chrome
 						    	var thisvalue = parseInt(ev.wheelDelta);
 						    	settings["father"]=sf;
-						    	//console.log(thisvalue)
 								if(thisvalue>0)
 								{
 									
@@ -469,7 +467,9 @@ $.fn.shineonScroll = function(options,fn)
 			{
 				var ev    = window.event || e;
 				var father = $("#"+settings["getfatherid"]).val();
-				if($("#"+sf).height()<$("#"+sf).children("div").eq(0).height()||$("#"+sf).width()<$("#"+sf).children("div").eq(0).width()||$("#"+sf).height()<$("#"+sf).children("span").eq(0).height()||$("#"+sf).width()<$("#"+sf).children("span").eq(0).width()){
+				if($("#"+father).height()<=$("#"+father+" ."+sonc).height()||$("#"+father).width()<=$("#"+father+" ."+sonc).width()){
+					return false;
+				}
 					//ev.preventDefault();
 				     var touch  = ev.touches[0], //获取第一个触点
 				     x          = Number(touch.pageX), //页面触点X坐标
@@ -501,9 +501,6 @@ $.fn.shineonScroll = function(options,fn)
 					    }
 					    _this.scrollings(settings);
 				     }		
-				}else{
-					return false;
-				}
 			};
 			this.touchEnd=function(e) 
 			{
@@ -531,7 +528,6 @@ $.fn.shineonScroll = function(options,fn)
 					/*注册事件web端*/
 					if(document.addEventListener)
 					{//W3C
-
 						if(navigator.userAgent.toLowerCase().match(/firefox/) != null)
 						{
 							document.addEventListener('DOMMouseScroll',this.scrollFunc,false);
@@ -551,8 +547,10 @@ $.fn.shineonScroll = function(options,fn)
 							    var starty=0;
 								document.getElementById(sf).onmousedown=function(e){ 
 									var e=window.event||e;
-									 
 									document.getElementById(sf).onselectstart=function (){return false;};
+									if($("#"+sf).height()<=$("#"+sf+" ."+sonc).height()||$("#"+sf).width()<=$("#"+sf+" ."+sonc).width()){
+										return false;
+									}
 									scrollflag=true;
 									if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([9.]+)/) != null)
 									{
@@ -564,14 +562,11 @@ $.fn.shineonScroll = function(options,fn)
 										startx=e.pageX;
 										starty=e.pageY;
 									}
-									
 								}
 								document.getElementById(sf).onmousemove=function(e){
 									var e=window.event||e;
-									
 									if(scrollflag)
 									{	
-										
 										if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([9.]+)/) != null)
 										{
 											var xlength=e.clientX-startx;
@@ -615,8 +610,7 @@ $.fn.shineonScroll = function(options,fn)
 														$("#"+sf+" ."+sonc).css("margin-left",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))-Math.abs(xlength))+"px");
 														$("#"+sf+" ."+ssy).css("left",(wid_scroll_x_width-sms/((wid_soncontent-wid_father)/wid_e_s_wid))+"px");
 													}
-											    }
-											    //_this.scrollings(settings);				
+											    }			
 											}							
 										}
 										else
@@ -625,11 +619,8 @@ $.fn.shineonScroll = function(options,fn)
 											hei_e_s_y_hei       = parseInt(hei_father-hei_scrolly);
 											if(settings.wheelxory=="wheely")
 											{
-												//console.log(parseInt($("#"+sf+" ."+sonc).css("margin-top")))
-											
 												//y方向
 												if(ylength>0){//下
-
 											     	 settings["wheelval"]=1;
 											     	  if(parseInt($("#"+sf+" ."+sonc).css("margin-top"))>=0){
 											     	 	$("#"+sf+" ."+sonc).css("margin-top","0px");
@@ -642,7 +633,6 @@ $.fn.shineonScroll = function(options,fn)
 											     	 	//计算每1像素代表的实际距离   margintop/没1像素代表的实际距离（+-）步长
 											     	 	$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
 											     	 }
-											     	 //console.log(ylength+"---------------")	
 											    }
 										     	else
 										     	{//上
@@ -662,13 +652,7 @@ $.fn.shineonScroll = function(options,fn)
 											     	
 											    }
 											}
-											
 										}
-										//新常态下不再做滚轮的监听
-//										if(window.onmousewheel||document.onmousewheel){//监听滚轮事件，如果ie有，则执行
-//											console.log("aaaaaaaaa")
-//											_this.scrollings(settings);
-//										}
 									}
 									
 								}
@@ -701,8 +685,10 @@ $.fn.shineonScroll = function(options,fn)
 							    var starty=0;
 								document.getElementById(sf).onmousedown=function(e){ 
 									var e=window.event||e;
-									 
 									document.getElementById(sf).onselectstart=function (){return false;};
+									if($("#"+sf).height()<=$("#"+sf+" ."+sonc).height()||$("#"+sf).width()<=$("#"+sf+" ."+sonc).width()){
+										return false;
+									}
 									scrollflag=true;
 									if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(9|10).]+)/) != null)
 									{
@@ -718,7 +704,9 @@ $.fn.shineonScroll = function(options,fn)
 								}
 								document.getElementById(sf).onmousemove=function(e){
 									var e=window.event||e;
-									
+									if(!($("#"+sf).height()<=$("#"+sf).children("div").eq(0).height()||$("#"+sf).width()<=$("#"+sf).children("div").eq(0).width()||$("#"+sf).height()<=$("#"+sf).children("span").eq(0).height()||$("#"+sf).width()<=$("#"+sf).children("span").eq(0).width())){
+										return false;
+									}
 									if(scrollflag)
 									{	
 										
@@ -792,16 +780,13 @@ $.fn.shineonScroll = function(options,fn)
 											     	 	//计算每1像素代表的实际距离   margintop/没1像素代表的实际距离（+-）步长
 											     	 	$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
 											     	 }
-											     	 //console.log(ylength+"---------------")	
 											    }
 										     	else
 										     	{//上
 										     		 
 											     	settings["wheelval"]=-1;
-											     	// $("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
 													if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))>=$("#"+sf+" ."+sonc).height()-$("#"+sf).height()){
 														$("#"+sf+" ."+sonc).css("margin-top",-($("#"+sf+" ."+sonc).height()-$("#"+sf).height())+"px");
-														//$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
 														$("#"+sf+" ."+ssy).css("top",($("#"+sf+" ."+ssymove).height()-$("#"+sf+" ."+ssy).height())+"px");
 													}
 													else
