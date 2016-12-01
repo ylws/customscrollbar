@@ -467,7 +467,8 @@ $.fn.shineonScroll = function(options,fn)
 			{
 				var ev    = window.event || e;
 				var father = $("#"+settings["getfatherid"]).val();
-				if($("#"+father).height()<=$("#"+father+" ."+sonc).height()||$("#"+father).width()<=$("#"+father+" ."+sonc).width()){
+				
+				if($("#"+father).height()>=$("#"+father+" ."+sonc).height()||$("#"+father).width()>$("#"+father+" ."+sonc).width()){
 					return false;
 				}
 					//ev.preventDefault();
@@ -548,7 +549,7 @@ $.fn.shineonScroll = function(options,fn)
 								document.getElementById(sf).onmousedown=function(e){ 
 									var e=window.event||e;
 									document.getElementById(sf).onselectstart=function (){return false;};
-									if($("#"+sf).height()<=$("#"+sf+" ."+sonc).height()||$("#"+sf).width()<=$("#"+sf+" ."+sonc).width()){
+									if($("#"+sf).height()>=$("#"+sf+" ."+sonc).height()||$("#"+sf).width()>$("#"+sf+" ."+sonc).width()){
 										return false;
 									}
 									scrollflag=true;
@@ -686,7 +687,7 @@ $.fn.shineonScroll = function(options,fn)
 								document.getElementById(sf).onmousedown=function(e){ 
 									var e=window.event||e;
 									document.getElementById(sf).onselectstart=function (){return false;};
-									if($("#"+sf).height()<=$("#"+sf+" ."+sonc).height()||$("#"+sf).width()<=$("#"+sf+" ."+sonc).width()){
+									if($("#"+sf).height()>=$("#"+sf+" ."+sonc).height()||$("#"+sf).width()>$("#"+sf+" ."+sonc).width()){
 										return false;
 									}
 									scrollflag=true;
@@ -704,7 +705,7 @@ $.fn.shineonScroll = function(options,fn)
 								}
 								document.getElementById(sf).onmousemove=function(e){
 									var e=window.event||e;
-									if(!($("#"+sf).height()<=$("#"+sf).children("div").eq(0).height()||$("#"+sf).width()<=$("#"+sf).children("div").eq(0).width()||$("#"+sf).height()<=$("#"+sf).children("span").eq(0).height()||$("#"+sf).width()<=$("#"+sf).children("span").eq(0).width())){
+									if($("#"+sf).height()>=$("#"+sf+" ."+sonc).height()||$("#"+sf).width()>$("#"+sf+" ."+sonc).width()){
 										return false;
 									}
 									if(scrollflag)
