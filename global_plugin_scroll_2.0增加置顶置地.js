@@ -18,10 +18,11 @@ $.fn.shineonScroll = function(options,fn)
 			"deloradd":"",//添加元素，删除元素参数del/add
 			"wheelxory":"wheely",//滚动类型wheelx轴，wheely轴
 			"wheelval":0,//滑轮上下滚动的值，1位向下，-1位向上
-			"marginstep":10,//步长,请使用数字
+			"marginstep":10,//步长,请使用数字，true为自动
 			"getfatherid":"whichscroll",//获取当前滚动区域模块id的隐藏域id
 			"scrolltop":"top",
 			"resetinit":0,//0代表不做处理，1代表重置
+			"scrolltarget":".scrollfather",//鼠标滑动，标记父元素
 			
 		};
 		
@@ -66,18 +67,25 @@ $.fn.shineonScroll = function(options,fn)
 		    ssy     = settings.scroll_y,
 		    ssxmove = settings.scroll_xmove,
 		    ssx     = settings.scroll_x,
-		    sms     = settings.marginstep;
+		    sms     = settings.marginstep,
+		    scrolltarget = settings.scrolltarget;
+		    if(sms==true||sms=="true"){
+		    	sms = $("#"+sf+" ."+sonc).height()/$("#"+sf).height()*5;
+		    	if(sms<=5){
+		    		sms = 5;
+		    	}
+		    }
 		    if(settings["resetinit"])
 		    {
 		    	if(settings["wheelxory"]=="wheely")
 		    	{
-		    		$("#"+settings["father"]+" ."+settings["soncontent"]).css("margin-top","0");
-					$("#"+settings["father"]+" ."+settings["scroll_y"]).css("top","0");
+		    		$("#"+sf+" ."+sonc).css("margin-top","0");
+					$("#"+sf+" ."+ssy).css("top","0");
 		    	}
 		    	else if(settings["wheelxory"]=="wheelx")
 		    	{
-		    		$("#"+settings["father"]+" ."+settings["soncontent"]).css("margin-left","0");
-					$("#"+settings["father"]+" ."+settings["scroll_x"]).css("left","0");
+		    		$("#"+sf+" ."+sonc).css("margin-left","0");
+					$("#"+sf+" ."+ssx).css("left","0");
 		    	}
 		    	return;
 		    }
@@ -85,8 +93,9 @@ $.fn.shineonScroll = function(options,fn)
 		{
 			var idval="";//获取当前鼠标指向元素的id也就是settings['father']
 			$("."+settings["soncontent"]).mouseover(function(){
-				$("#"+settings["getfatherid"]).val($(this).parents(".scrollfather").attr("id"));
+				$("#"+settings["getfatherid"]).val($(this).parents(scrolltarget).attr("id"));
 				idval=$("#"+settings["getfatherid"]).val();
+				document.body.onmousewheel=function(){return false};   
 			});
 			if($("#"+sf).offset()!=undefined)
 			{
@@ -99,7 +108,8 @@ $.fn.shineonScroll = function(options,fn)
 				wid_f_offwid    = $("#"+sf).offset()['left'];
 				wid_father		= $("#"+sf).width();
 				wid_soncontent	= $("#"+sf+" ."+sonc).width();
-				
+				$("#"+sf+" ."+ssymove).height($("#"+sf).height());
+				$("#"+sf+" ."+ssxmove).height($("#"+sf).width());
 				//y轴
 				if(hei_father<hei_soncontent){
 					$("#"+sf+" ."+ssy).show();
@@ -130,7 +140,7 @@ $.fn.shineonScroll = function(options,fn)
 					//y轴
 					$("#"+sf+" ."+ssy).mousedown(function(e){
 						e.preventDefault();
-						var sf            = $(this).parents(".scrollfather").attr("id");
+						var sf            = $(this).parents(scrolltarget).attr("id");
 						$("#"+settings["getfatherid"]).val(sf);
 						hei_nowposition_y = e.pageY;//获取当前点击点的位置
 						//ie、chrome当top为0时，值为auto,需做处理
@@ -146,7 +156,7 @@ $.fn.shineonScroll = function(options,fn)
 					//x轴
 					$("#"+sf+" ."+ssx).mousedown(function(e){
 						e.preventDefault();
-						var sf            = $(this).parents(".scrollfather").attr("id");
+						var sf            = $(this).parents(scrolltarget).attr("id");
 						$("#"+settings["getfatherid"]).val(sf);
 						wid_nowposition_x=e.pageX;//获取当前点击点的位置
 						//ie、chrome当left为0时，值为auto,需做处理
@@ -181,16 +191,19 @@ $.fn.shineonScroll = function(options,fn)
 							if(hei_scrolltop_y<=0)
 							{
 								$("#"+sf+" ."+ssy).css("top",0+"px");
+								$("#"+sf+" ."+sonc).css("margin-top","0px");
 							}
 							else if(hei_scrolltop_y>=hei_e_s_y_hei)
 							{
 								$("#"+sf+" ."+ssy).css("top",hei_e_s_y_hei+"px");
+								$("#"+sf+" ."+sonc).css("margin-top",-(hei_soncontent-hei_father)+"px");
 							}
 							else
 							{
 								$("#"+sf+" ."+ssy).css("top",hei_scrolltop_y+"px");
+								$("#"+sf+" ."+sonc).css("margin-top",-hei_scrollheight+"px");
 							}
-							$("#"+sf+" ."+sonc).css("margin-top",-hei_scrollheight+"px");
+							
 						}
 						else
 						{
@@ -208,16 +221,19 @@ $.fn.shineonScroll = function(options,fn)
 							if(wid_scrollleft_x<=0)
 							{
 								$("#"+sf+" ."+ssx).css("left",0+"px");
+								$("#"+sf+" ."+sonc).css("margin-left","0px");
 							}
 							else if(wid_scrollleft_x>=wid_e_s_wid)
 							{
 								$("#"+sf+" ."+ssx).css("left",wid_e_s_wid+"px");
+								$("#"+sf+" ."+sonc).css("margin-left",-(wid_soncontent-wid_father)+"px");
 							}
 							else
 							{
 								$("#"+sf+" ."+ssx).css("left",wid_scrollleft_x+"px");
+								$("#"+sf+" ."+sonc).css("margin-left",-wid_scrollwidth+"px");
 							}
-							$("#"+sf+" ."+sonc).css("margin-left",-wid_scrollwidth+"px");
+							
 						}
 						else
 						{
@@ -396,13 +412,16 @@ $.fn.shineonScroll = function(options,fn)
 			    funx         = ev.pageX;
 			    funy         = ev.pageY;
 			    $("."+settings["soncontent"]).mouseover(function(e){
-					$("#"+settings["getfatherid"]).val($(this).parents(".scrollfather").attr("id"));
+					$("#"+settings["getfatherid"]).val($(this).parents(scrolltarget).attr("id"));
 					funx         = e.pageX;
-			   		 funy        = e.pageY;
+			   		funy        = e.pageY;
+			   		document.body.onmousewheel=function(){return false};   
 				});
 				sf=$("#"+settings["getfatherid"]).val();
 			    if($("#"+sf).height()<$("#"+sf+" ."+sonc).height()||$("#"+sf).width()<$("#"+sf+" ."+sonc).width())
 				{
+					
+					
 					if(document.getElementById(sf).offsetTop!=undefined)
 					{
 						fathery      = $("#"+sf).offset()['top'];
@@ -414,7 +433,7 @@ $.fn.shineonScroll = function(options,fn)
 					    	funy=fathery;
 					    }
 					    if(funx>=fatherx&&funx<=(fatherx+$("#"+sf).width())&&funy>=fathery&&funy<=(fathery+$("#"+sf).height()))
-					    {		    	
+					    {	  
 						    if(ev.wheelDelta)
 						    {//IE/Opera/Chrome
 						    	var thisvalue = parseInt(ev.wheelDelta);
@@ -444,6 +463,8 @@ $.fn.shineonScroll = function(options,fn)
 								}
 								_this.scrollings(settings)
 						    }
+					  }else{
+					   	document.body.onmousewheel=function(){};  
 					   }
 					}
 				}
