@@ -19,11 +19,12 @@ $.fn.shineonScroll = function(options,fn)
 			"wheelxory":"wheely",//滚动类型wheelx轴，wheely轴
 			"wheelval":0,//滑轮上下滚动的值，1位向下，-1位向上
 			"marginstep":10,//步长,请使用数字，true为自动
+			"marginstepbole":8,//步长,请使用数字，true为自动
 			"getfatherid":"whichscroll",//获取当前滚动区域模块id的隐藏域id
 			"scrolltop":"top",
 			"resetinit":0,//0代表不做处理，1代表重置
 			"scrolltarget":".scrollfather",//鼠标滑动，标记父元素
-			
+			"smscrollfnprev":"phone_",//手机端滚动回调方法前缀
 		};
 		
 		var settings = $.extend({},defaults,options);
@@ -68,6 +69,9 @@ $.fn.shineonScroll = function(options,fn)
 		    ssxmove = settings.scroll_xmove,
 		    ssx     = settings.scroll_x,
 		    sms     = settings.marginstep,
+		    smsbole     = settings.marginstepbole,
+		    smscrollfnprv = settings.smscrollfnprev,
+		    smscrollfn = smscrollfnprv+sf,
 		    scrolltarget = settings.scrolltarget;
 		    if(sms==true||sms=="true"){
 		    	sms = $("#"+sf+" ."+sonc).height()/$("#"+sf).height()*5;
@@ -89,15 +93,7 @@ $.fn.shineonScroll = function(options,fn)
 		    	}
 		    	return;
 		    }
-		this.scrollings=function(settings)
-		{
-			var idval="";//获取当前鼠标指向元素的id也就是settings['father']
-			$("."+settings["soncontent"]).mouseover(function(){
-				$("#"+settings["getfatherid"]).val($(this).parents(scrolltarget).attr("id"));
-				idval=$("#"+settings["getfatherid"]).val();
-				document.body.onmousewheel=function(){return false};   
-			});
-			if($("#"+sf).offset()!=undefined)
+		    if($("#"+sf).offset()!=undefined)
 			{
 				//y轴
 				hei_f_offhei    = $("#"+sf).offset()['top'];
@@ -109,7 +105,7 @@ $.fn.shineonScroll = function(options,fn)
 				wid_father		= $("#"+sf).width();
 				wid_soncontent	= $("#"+sf+" ."+sonc).width();
 				$("#"+sf+" ."+ssymove).height($("#"+sf).height());
-				$("#"+sf+" ."+ssxmove).height($("#"+sf).width());
+				$("#"+sf+" ."+ssxmove).width(parseInt($("#"+sf).width()));
 				//y轴
 				if(hei_father<hei_soncontent){
 					$("#"+sf+" ."+ssy).show();
@@ -134,12 +130,212 @@ $.fn.shineonScroll = function(options,fn)
 					$("#"+sf+" ."+ssxmove).hide();
 					
 				}
-				if (!(navigator.userAgent.match(/(iPhone|Android|iPad)/i)))
+			}else{
+				throw new Error("未能正确获取（"+sf+"）的offset()");
+			}
+		this.scrollings=function(settings)
+		{
+			var idval="";//获取当前鼠标指向元素的id也就是settings['father']
+			
+			$("."+settings["soncontent"]).mouseover(function(){
+				$("#"+settings["getfatherid"]).val($(this).parents(scrolltarget).attr("id"));
+				idval=$("#"+settings["getfatherid"]).val();
+				settings.wheelxory = $("#"+idval).attr("wheelxory");
+				if($("#"+idval).height()>$(this).height()||$("#"+idval).width()>$(this).width()){
+		   			document.body.onmousewheel=function(){ return false};  
+		   		}else{
+		   			document.body.onmousewheel=null;
+		   		}
+		   		smscrollfn = smscrollfnprv+idval;
+		   		
+				
+			})
+			if($("#"+sf).offset()!=undefined)
+			{
+				//y轴
+				hei_f_offhei    = $("#"+sf).offset()['top'];
+				
+				hei_father		= $("#"+sf).height();
+				hei_soncontent	= $("#"+sf+" ."+sonc).height();
+				//x轴
+				wid_f_offwid    = $("#"+sf).offset()['left'];
+				wid_father		= $("#"+sf).width();
+				wid_soncontent	= $("#"+sf+" ."+sonc).width();
+				$("#"+sf+" ."+ssymove).height($("#"+sf).height());
+				$("#"+sf+" ."+ssxmove).width(parseInt($("#"+sf).width()));
+				//y轴
+				if(hei_father<hei_soncontent){
+					$("#"+sf+" ."+ssy).show();
+					$("#"+sf+" ."+ssymove).show();
+					hei_scrolly	= hei_father*(hei_father/hei_soncontent);
+					$("#"+sf+" ."+ssy).height(hei_scrolly);
+				}else{
+					$("#"+sf+" ."+ssy).hide();
+					$("#"+sf+" ."+ssymove).hide();
+				}
+				//x轴
+				if(wid_father<wid_soncontent)
+				{
+					$("#"+sf+" ."+ssx).show();
+					$("#"+sf+" ."+ssxmove).show();
+					wid_scrollx		=	wid_father*(wid_father/wid_soncontent);
+					$("#"+sf+" ."+ssx).width(wid_scrollx);
+				}
+				else
+				{
+					$("#"+sf+" ."+ssx).hide();
+					$("#"+sf+" ."+ssxmove).hide();
+					
+				}
+			}else{
+				throw new Error("未能正确获取（"+sf+"）的offset()");
+			}
+			
+			if(settings.wheelxory=="wheely")
+			{
+				//执行一次mousemove事件
+				//ie、chrome当top为0时，值为auto,需做处理
+				if($("#"+sf+" ."+ssy).css("top")=="auto")
+				{
+					$("#"+sf+" ."+ssy).css("top","0");
+				}
+				hei_scroll_y_height = parseFloat($("#"+sf+" ."+ssy).css("top"));
+				
+				hei_e_s_y_hei       = parseInt(hei_father-hei_scrolly);
+				//计算滚动位置，子元素移动多长距离
+				var minstep = (hei_soncontent-hei_father)/hei_e_s_y_hei;
+				hei_scrollheight    = hei_scroll_y_height*minstep;
+				
+				if(settings["wheelval"]>=0)
+				{
+					if(hei_scroll_y_height==hei_e_s_y_hei)
+					{
+						$("#"+sf+" ."+ssy).css("top",hei_e_s_y_hei+"px");
+						$("#"+sf+" ."+sonc).css("margin-top",(-hei_soncontent+hei_father)+"px");
+					}
+					else if(hei_scroll_y_height>hei_e_s_y_hei)
+					{
+						$("#"+sf+" ."+sonc).css("margin-top",(-hei_soncontent+hei_father)+"px");
+					}
+					else
+					{
+						//点击添加元素，滑轮滚动，出现滚动到底部有空白
+						
+						if((parseFloat($("#"+sf+" ."+ssy).css("top"))+parseFloat($("#"+sf+" ."+ssy).css("height")))>=(parseFloat(hei_father)-sms))
+						{
+							$("#"+sf+" ."+ssy).css("top",hei_e_s_y_hei+"px");
+							$("#"+sf+" ."+sonc).css("margin-top",(-hei_soncontent+hei_father)+"px");
+						}
+						else
+						{
+							$("#"+sf+" ."+ssy).css("top",((hei_scrollheight+sms)/minstep)+"px");
+							$("#"+sf+" ."+sonc).css("margin-top",(-hei_scrollheight-sms)+"px");
+						}
+					}	
+				}
+				else if(settings["wheelval"]<0)
+				{
+					if(hei_scroll_y_height<=0)
+					{
+						$("#"+sf+" ."+ssy).css("top","0px");
+						$("#"+sf+" ."+sonc).css("margin-top","0px");
+					}
+					else
+					{
+						if((hei_scroll_y_height-minstep/sms)<=0)
+						{
+							$("#"+sf+" ."+ssy).css("top","0px");
+							$("#"+sf+" ."+sonc).css("margin-top","0px");
+						}
+						else
+						{
+							$("#"+sf+" ."+ssy).css("top",((hei_scrollheight-sms)/minstep)+"px");
+					  		$("#"+sf+" ."+sonc).css("margin-top",(-hei_scrollheight+sms)+"px");
+						}
+					}
+				}
+			}
+			else if(settings.wheelxory=="wheelx")
+			{
+				//执行一次mousemove事件
+				//ie、chrome当left为0时，值为auto,需做处理
+				if($("#"+sf+" ."+ssx).css("left")=="auto")
+				{
+					$("#"+sf+" ."+ssx).css("left","0");
+				}
+				wid_scroll_x_width = parseInt($("#"+sf+" ."+ssx).css("left"));
+				wid_e_s_wid        = wid_father-wid_scrollx;
+				//计算滚动位置，子元素移动多长距离
+				var minstep = (wid_soncontent-wid_father)/wid_e_s_wid,
+				wid_scrollwidth    = wid_scroll_x_width*minstep;
+				if(settings["wheelval"]>=0)
+				{
+					
+					if(wid_scroll_x_width==wid_e_s_wid)
+					{
+						$("#"+sf+" ."+ssx).css("left",wid_e_s_wid+"px");
+						$("#"+sf+" ."+sonc).css("margin-left",(-wid_soncontent+wid_father)+"px");
+					}
+					else if(wid_scroll_x_width>wid_e_s_wid)
+					{
+						$("#"+sf+" ."+sonc).css("margin-left",(-wid_soncontent+wid_father)+"px");
+	//					$("."+scroll_x).css("left",wid_e_s_wid+"px");
+					}
+					else
+					{
+						if((wid_scroll_x_width+parseInt($("#"+sf+" ."+ssx).css("width")))>=(wid_father-sms))
+						{
+							$("#"+sf+" ."+ssx).css("left",wid_e_s_wid+"px");
+							$("#"+sf+" ."+sonc).css("margin-left",(-wid_soncontent+wid_father)+"px");
+						}
+						else
+						{
+							$("#"+sf+" ."+ssx).css("left",((wid_scrollwidth+sms)/minstep)+"px");
+								$("#"+sf+" ."+sonc).css("margin-left",(-wid_scrollwidth-sms)+"px");
+						}			
+					}	
+				}
+				else if(settings["wheelval"]<0)
+				{
+					if(wid_scroll_x_width<=0)
+					{
+						$("#"+sf+" ."+ssx).css("left","0px");
+						$("#"+sf+" ."+sonc).css("margin-left","0px");
+					}
+					else
+					{
+						if((wid_scroll_x_width-(wid_e_s_wid/wid_e_s_wid)/sms)<=0)
+						{
+							$("#"+sf+" ."+ssx).css("left","0px");
+							$("#"+sf+" ."+sonc).css("margin-left","0px");
+						}
+						else
+						{
+							$("#"+sf+" ."+ssx).css("left",((wid_scrollwidth-sms)/minstep)+"px");
+					   		$("#"+sf+" ."+sonc).css("margin-left",(-wid_scrollwidth+sms)+"px");
+						}
+					}
+				}
+				
+			}
+			if(window[smscrollfn]){
+				window[smscrollfn](sf,settings["wheelval"]);
+			}
+		};
+		this.onmouseclick = function(){
+			if (!(navigator.userAgent.match(/(iPhone|Android|iPad)/i)))
 				{
 					//鼠标事件添加
 					//y轴
+					var sf = $("#"+settings["getfatherid"]).val();
+					var sfwid = $("#"+sf).width();
+					var sfhei = $("#"+sf).height();
+					var flag = false;
+					smscrollfn = smscrollfnprv+sf;
 					$("#"+sf+" ."+ssy).mousedown(function(e){
+						var e = window.event||e;
 						e.preventDefault();
+						flag = true;
 						var sf            = $(this).parents(scrolltarget).attr("id");
 						$("#"+settings["getfatherid"]).val(sf);
 						hei_nowposition_y = e.pageY;//获取当前点击点的位置
@@ -151,11 +347,65 @@ $.fn.shineonScroll = function(options,fn)
 						//前点击点距离顶部的位置
 						hei_click_top=hei_nowposition_y-hei_f_offhei-hei_scroll_y_height;
 						$("#"+sf+" ."+ssy).attr("unorbind","bind");
+						$(document).mouseup(function(){
+							flag = false;
+							$("#"+sf+" ."+ssy).attr("unorbind","unbind");
+							$("#"+sf+" ."+ssx).attr("unorbind","unbind");
+							$("#"+settings["getfatherid"]).val(sf);
+							document.body.onmousewheel=null;
+							if(window[smscrollfn]){
+								window[smscrollfn](sf,settings["wheelval"]);
+							}
+						});
+						$("#"+sf).mousemove(function(e){
+							var e = window.event||e;
+							if(flag){
+								var sfleft = $("#"+sf).offset().left;
+								var sftop = $("#"+sf).offset().top;
+								if(e.pageX<(sfleft+sfwid)&&e.pageX>sfleft&&e.pageY>sftop&&e.pageY<(sftop+sfhei)){
+									if($("#"+sf+" ."+ssy).attr("unorbind")=="bind")
+									{
+										//y轴
+										hei_scroll_y_height=parseInt($("#"+sf+" ."+ssy).css("top"));
+										hei_nowposition_y_up=e.pageY;//获取移动点的坐标
+										hei_scrolltop_y=hei_nowposition_y_up-hei_f_offhei-hei_click_top;
+										hei_e_s_y_hei=hei_father-hei_scrolly;
+										hei_soncontent = $("#"+sf+" ."+sonc).height();//鼠标移动到两个同时存在的模拟滚动条时，会被覆盖掉，需重置
+										hei_father = $("#"+sf).height();//鼠标移动到两个同时存在的模拟滚动条时，会被覆盖掉，需重置
+										//计算滚动位置，子元素移动多长距离
+										hei_scrollheight=hei_scroll_y_height*((hei_soncontent-hei_father)/hei_e_s_y_hei);
+										if(hei_scrolltop_y<=0)
+										{
+											$("#"+sf+" ."+ssy).css("top",0+"px");
+											$("#"+sf+" ."+sonc).css("margin-top","0px");
+										}
+										else if(hei_scrolltop_y>=hei_e_s_y_hei)
+										{
+											$("#"+sf+" ."+ssy).css("top",hei_e_s_y_hei+"px");
+											$("#"+sf+" ."+sonc).css("margin-top",-(hei_soncontent-hei_father)+"px");
+										}
+										else
+										{
+											$("#"+sf+" ."+ssy).css("top",hei_scrolltop_y+"px");
+											$("#"+sf+" ."+sonc).css("margin-top",-hei_scrollheight+"px");
+										}
+									}
+								}else{
+									document.body.onmousewheel=null;
+								}
+							}else{
+								document.body.onmousewheel=null;
+							}
+							
+						})
 
 					});
 					//x轴
 					$("#"+sf+" ."+ssx).mousedown(function(e){
+						var e = window.event||e;
 						e.preventDefault();
+						
+						flag = true;
 						var sf            = $(this).parents(scrolltarget).attr("id");
 						$("#"+settings["getfatherid"]).val(sf);
 						wid_nowposition_x=e.pageX;//获取当前点击点的位置
@@ -168,80 +418,69 @@ $.fn.shineonScroll = function(options,fn)
 						//前点击点距离顶部的位置
 						wid_click_left=wid_nowposition_x-wid_f_offwid-wid_scroll_x_width;
 						$("#"+sf+" ."+ssx).attr("unorbind","bind");
-					});
-					$(document).mouseup(function(e){
-						var sf            = $("#"+settings["getfatherid"]).val();;
-						$("#"+sf+" ."+ssy).attr("unorbind","unbind");
-						$("#"+sf+" ."+ssx).attr("unorbind","unbind");
-						//alert(sf)
-						$("#"+settings["getfatherid"]).val(sf);
-					});
-					$(document).mousemove(function(e){
-						//e.preventDefault();
-						var sf=$("#"+settings["getfatherid"]).val();
-						//y轴
-						hei_scroll_y_height=parseInt($("#"+sf+" ."+ssy).css("top"));
-						hei_nowposition_y_up=e.pageY;//获取移动点的坐标
-						hei_scrolltop_y=hei_nowposition_y_up-hei_f_offhei-hei_click_top;
-						hei_e_s_y_hei=hei_father-hei_scrolly;
-						//计算滚动位置，子元素移动多长距离
-						hei_scrollheight=hei_scroll_y_height*((hei_soncontent-hei_father)/hei_e_s_y_hei);
-						if($("#"+sf+" ."+ssy).attr("unorbind")=="bind")
-						{
-							if(hei_scrolltop_y<=0)
-							{
-								$("#"+sf+" ."+ssy).css("top",0+"px");
-								$("#"+sf+" ."+sonc).css("margin-top","0px");
+						$(document).mouseup(function(){
+							flag = false;
+							$("#"+sf+" ."+ssy).attr("unorbind","unbind");
+							$("#"+sf+" ."+ssx).attr("unorbind","unbind");
+							$("#"+settings["getfatherid"]).val(sf);
+							document.body.onmousewheel=null;
+							if(window[smscrollfn]){
+								window[smscrollfn](sf,settings["wheelval"]);
 							}
-							else if(hei_scrolltop_y>=hei_e_s_y_hei)
-							{
-								$("#"+sf+" ."+ssy).css("top",hei_e_s_y_hei+"px");
-								$("#"+sf+" ."+sonc).css("margin-top",-(hei_soncontent-hei_father)+"px");
-							}
-							else
-							{
-								$("#"+sf+" ."+ssy).css("top",hei_scrolltop_y+"px");
-								$("#"+sf+" ."+sonc).css("margin-top",-hei_scrollheight+"px");
-							}
-							
-						}
-						else
-						{
-					
-						}
-						//x轴
-						wid_scroll_x_width = parseInt($("#"+sf+" ."+ssx).css("left"));
-						wid_np_x_left      = e.pageX;//获取移动点的坐标
-						wid_scrollleft_x   = wid_np_x_left-wid_f_offwid-wid_click_left;
-						wid_e_s_wid        = wid_father-wid_scrollx;
-						//计算滚动位置，子元素移动多长距离
-						wid_scrollwidth    = wid_scroll_x_width*((wid_soncontent-wid_father)/wid_e_s_wid);
-						if($("#"+sf+" ."+ssx).attr("unorbind")=="bind")
-						{
-							if(wid_scrollleft_x<=0)
-							{
-								$("#"+sf+" ."+ssx).css("left",0+"px");
-								$("#"+sf+" ."+sonc).css("margin-left","0px");
-							}
-							else if(wid_scrollleft_x>=wid_e_s_wid)
-							{
-								$("#"+sf+" ."+ssx).css("left",wid_e_s_wid+"px");
-								$("#"+sf+" ."+sonc).css("margin-left",-(wid_soncontent-wid_father)+"px");
-							}
-							else
-							{
-								$("#"+sf+" ."+ssx).css("left",wid_scrollleft_x+"px");
-								$("#"+sf+" ."+sonc).css("margin-left",-wid_scrollwidth+"px");
+						});
+						$("#"+sf).mousemove(function(e){
+							var e = window.event||e;
+							if(flag){
+								var sfleft = $("#"+sf).offset().left;
+								var sftop = $("#"+sf).offset().top;
+								if(e.pageX<(sfleft+sfwid)&&e.pageX>sfleft&&e.pageY>sftop&&e.pageY<(sftop+sfhei)){
+									if($("#"+sf+" ."+ssx).attr("unorbind")=="bind")
+									{
+										//x轴
+										wid_scroll_x_width = parseInt($("#"+sf+" ."+ssx).css("left"));
+										wid_np_x_left      = e.pageX;//获取移动点的坐标
+										wid_scrollleft_x   = wid_np_x_left-wid_f_offwid-wid_click_left;
+										wid_e_s_wid        = wid_father-wid_scrollx;
+										wid_soncontent = $("#"+sf+" ."+sonc).width();//鼠标移动到两个同时存在的模拟滚动条时，会被覆盖掉，需重置
+										wid_father = $("#"+sf).width();//鼠标移动到两个同时存在的模拟滚动条时，会被覆盖掉，需重置
+										//计算滚动位置，子元素移动多长距离
+										wid_scrollwidth    = wid_scroll_x_width*((wid_soncontent-wid_father)/wid_e_s_wid);
+										if($("#"+sf+" ."+ssx).attr("unorbind")=="bind")
+										{
+											if(wid_scrollleft_x<=0)
+											{
+												$("#"+sf+" ."+ssx).css("left",0+"px");
+												$("#"+sf+" ."+sonc).css("margin-left","0px");
+											}
+											else if(wid_scrollleft_x>=wid_e_s_wid)
+											{
+												$("#"+sf+" ."+ssx).css("left",wid_e_s_wid+"px");
+												$("#"+sf+" ."+sonc).css("margin-left",-(wid_soncontent-wid_father)+"px");
+											}
+											else
+											{
+												$("#"+sf+" ."+ssx).css("left",wid_scrollleft_x+"px");
+												$("#"+sf+" ."+sonc).css("margin-left",-wid_scrollwidth+"px");
+											}
+										}
+									}
+								}else{
+									document.body.onmousewheel=null;
+								}
+							}else{
+								document.body.onmousewheel=null;
 							}
 							
-						}
-						else
-						{
+						})
+
+						
+					});
 					
-						}
-					})
-				};
-				if(settings.deloradd=="del")
+					
+				};	
+		};
+		this.delElement = function(){
+			if(settings.deloradd=="del")
 				{//需要获取子元素总的高度；重新计算滚动条每像素代表的实际margin距离和滚动条高度增加后，重新赋值
 					hei_c_hei = parseInt($("#"+sf+" ."+ssy).css("height"));
 					hei_c_top = parseInt($("#"+sf+" ."+ssy).css("top"));
@@ -260,149 +499,24 @@ $.fn.shineonScroll = function(options,fn)
 					$("#"+sf+" ."+sonc).css("margin-top",-hei_scrollheight+"px");
 					
 				}
-				else if(settings.deloradd=="add")
-				{//需要获取子元素总的高度；重新计算滚动条每像素代表的实际margin距离和滚动条高度增加后，重新赋值
-					hei_c_hei=parseInt($("#"+sf+" ."+ssy).css("height"));
-					hei_c_top=parseInt($("#"+sf+" ."+ssy).css("top"));
-					if((hei_c_hei+hei_c_top)<=hei_father)
-					{
-						$("#"+sf+" ."+ssy).css("top",(hei_father-hei_c_hei)+"px");
-					}else{}
-					//$("."+scroll_y).css("top",(hei_father-hei_c_top)+"px");
-					hei_scroll_y_height = parseInt($("#"+sf+" ."+ssy).css("top"));
-					hei_e_s_y_hei       = hei_father-hei_scrolly;
-					//计算滚动位置，子元素移动多长距离
-					hei_scrollheight    = hei_scroll_y_height*((hei_soncontent-hei_father)/hei_e_s_y_hei);
-					$("#"+sf+" ."+sonc).css("margin-top",-hei_scrollheight+"px");
-				}else{}
-				if(settings.wheelxory=="wheely")
-				{
-					//执行一次mousemove事件
-					//ie、chrome当top为0时，值为auto,需做处理
-					if($("#"+sf+" ."+ssy).css("top")=="auto")
-					{
-						$("#"+sf+" ."+ssy).css("top","0");
-					}
-					hei_scroll_y_height = parseInt($("#"+sf+" ."+ssy).css("top"));
-					hei_e_s_y_hei       = parseInt(hei_father-hei_scrolly);
-					//计算滚动位置，子元素移动多长距离
-					hei_scrollheight    = hei_scroll_y_height*((hei_soncontent-hei_father)/hei_e_s_y_hei);
-					if(settings["wheelval"]>=0)
-					{
-						if(hei_scroll_y_height==hei_e_s_y_hei)
-						{
-							$("#"+sf+" ."+ssy).css("top",hei_e_s_y_hei+"px");
-							$("#"+sf+" ."+sonc).css("margin-top",(-hei_soncontent+hei_father)+"px");
-						}
-						else if(hei_scroll_y_height>hei_e_s_y_hei)
-						{
-							$("#"+sf+" ."+sonc).css("margin-top",(-hei_soncontent+hei_father)+"px");
-						}
-						else
-						{
-							//点击添加元素，滑轮滚动，出现滚动到底部有空白
-							//alert((parseInt($("."+scroll_y).css("top"))+parseInt($("."+scroll_y).css("height"))))
-							if((parseInt($("#"+sf+" ."+ssy).css("top"))+parseInt($("#"+sf+" ."+ssy).css("height")))>=(parseInt(hei_father)-sms))
-							{
-								//alert("a")
-								$("#"+sf+" ."+ssy).css("top",hei_e_s_y_hei+"px");
-								$("#"+sf+" ."+sonc).css("margin-top",(-hei_soncontent+hei_father)+"px");
-							}
-							else
-							{
-								$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
-								$("#"+sf+" ."+sonc).css("margin-top",(-hei_scrollheight-sms)+"px");
-							}
-						}	
-					}
-					else if(settings["wheelval"]<0)
-					{
-						if(hei_scroll_y_height<=0)
-						{
-							$("#"+sf+" ."+ssy).css("top","0px");
-							$("#"+sf+" ."+sonc).css("margin-top","0px");
-						}
-						else
-						{
-							if((hei_scroll_y_height-sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))<=0)
-							{
-								$("#"+sf+" ."+ssy).css("top","0px");
-								$("#"+sf+" ."+sonc).css("margin-top","0px");
-							}
-							else
-							{
-								$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height-sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
-						  		$("#"+sf+" ."+sonc).css("margin-top",(-hei_scrollheight+sms)+"px");
-							}
-						}
-					}
-				}
-				else if(settings.wheelxory=="wheelx")
-				{
-					//执行一次mousemove事件
-					//ie、chrome当left为0时，值为auto,需做处理
-					if($("#"+sf+" ."+ssx).css("left")=="auto")
-					{
-						$("#"+sf+" ."+ssx).css("left","0");
-					}
-					wid_scroll_x_width = parseInt($("#"+sf+" ."+ssx).css("left"));
-					wid_e_s_wid        = wid_father-wid_scrollx;
-					//计算滚动位置，子元素移动多长距离
-					wid_scrollwidth    = wid_scroll_x_width*((wid_soncontent-wid_father)/wid_e_s_wid);
-					
-					if(settings["wheelval"]>=0)
-					{
-						
-						if(wid_scroll_x_width==wid_e_s_wid)
-						{
-							$("#"+sf+" ."+ssx).css("left",wid_e_s_wid+"px");
-							$("#"+sf+" ."+sonc).css("margin-left",(-wid_soncontent+wid_father)+"px");
-						}
-						else if(wid_scroll_x_width>wid_e_s_wid)
-						{
-							$("#"+sf+" ."+sonc).css("margin-left",(-wid_soncontent+wid_father)+"px");
-		//					$("."+scroll_x).css("left",wid_e_s_wid+"px");
-						}
-						else
-						{
-							if((wid_scroll_x_width+parseInt($("#"+sf+" ."+ssx).css("width")))>=(wid_father-sms))
-							{
-								$("#"+sf+" ."+ssx).css("left",wid_e_s_wid+"px");
-								$("#"+sf+" ."+sonc).css("margin-left",(-wid_soncontent+wid_father)+"px");
-							}
-							else
-							{
-								$("#"+sf+" ."+ssx).css("left",(wid_scroll_x_width+sms/(wid_e_s_wid/wid_e_s_wid))+"px");
-								$("#"+sf+" ."+sonc).css("margin-left",(-wid_scrollwidth-sms)+"px");
-							}			
-						}	
-					}
-					else if(settings["wheelval"]<0)
-					{
-						if(wid_scroll_x_width<=0)
-						{
-							$("#"+sf+" ."+ssx).css("left","0px");
-							$("#"+sf+" ."+sonc).css("margin-left","0px");
-						}
-						else
-						{
-							if((wid_scroll_x_width-sms/(wid_e_s_wid/wid_e_s_wid))<=0)
-							{
-								$("#"+sf+" ."+ssx).css("left","0px");
-								$("#"+sf+" ."+sonc).css("margin-left","0px");
-							}
-							else
-							{
-								$("#"+sf+" ."+ssx).css("left",(wid_scroll_x_width-sms/(wid_e_s_wid/wid_e_s_wid))+"px");
-						   		 $("#"+sf+" ."+sonc).css("margin-left",(-wid_scrollwidth+sms)+"px");
-							}
-						}
-					}
-					
-				}
-			}
-			
 		};
+		this.addElement = function(){
+			if(settings.deloradd=="add")
+			{//需要获取子元素总的高度；重新计算滚动条每像素代表的实际margin距离和滚动条高度增加后，重新赋值
+				hei_c_hei=parseInt($("#"+sf+" ."+ssy).css("height"));
+				hei_c_top=parseInt($("#"+sf+" ."+ssy).css("top"));
+				if((hei_c_hei+hei_c_top)<=hei_father)
+				{
+					$("#"+sf+" ."+ssy).css("top",(hei_father-hei_c_hei)+"px");
+				}else{}
+				//$("."+scroll_y).css("top",(hei_father-hei_c_top)+"px");
+				hei_scroll_y_height = parseInt($("#"+sf+" ."+ssy).css("top"));
+				hei_e_s_y_hei       = hei_father-hei_scrolly;
+				//计算滚动位置，子元素移动多长距离
+				hei_scrollheight    = hei_scroll_y_height*((hei_soncontent-hei_father)/hei_e_s_y_hei);
+				$("#"+sf+" ."+sonc).css("margin-top",-hei_scrollheight+"px");
+			}
+		}
 		this.scrollFunc=function(e)
 			{
 				var idval="";
@@ -413,15 +527,20 @@ $.fn.shineonScroll = function(options,fn)
 			    funy         = ev.pageY;
 			    $("."+settings["soncontent"]).mouseover(function(e){
 					$("#"+settings["getfatherid"]).val($(this).parents(scrolltarget).attr("id"));
+					idval = $("#"+settings["getfatherid"]).val()
+					settings.wheelxory = $("#"+idval).attr("wheelxory");
 					funx         = e.pageX;
 			   		funy        = e.pageY;
-			   		document.body.onmousewheel=function(){return false};   
+			   		if($("#"+idval).height()>$(this).height()||$("#"+idval).width()>$(this).width()){
+			   			document.body.onmousewheel=function(){ return false};  
+			   		}else{
+			   			document.body.onmousewheel=null;
+			   		}
+			   		smscrollfn = smscrollfnprv+idval;
 				});
 				sf=$("#"+settings["getfatherid"]).val();
 			    if($("#"+sf).height()<$("#"+sf+" ."+sonc).height()||$("#"+sf).width()<$("#"+sf+" ."+sonc).width())
 				{
-					
-					
 					if(document.getElementById(sf).offsetTop!=undefined)
 					{
 						fathery      = $("#"+sf).offset()['top'];
@@ -433,7 +552,7 @@ $.fn.shineonScroll = function(options,fn)
 					    	funy=fathery;
 					    }
 					    if(funx>=fatherx&&funx<=(fatherx+$("#"+sf).width())&&funy>=fathery&&funy<=(fathery+$("#"+sf).height()))
-					    {	  
+					    {	    
 						    if(ev.wheelDelta)
 						    {//IE/Opera/Chrome
 						    	var thisvalue = parseInt(ev.wheelDelta);
@@ -464,9 +583,11 @@ $.fn.shineonScroll = function(options,fn)
 								_this.scrollings(settings)
 						    }
 					  }else{
-					   	document.body.onmousewheel=function(){};  
+					   	document.body.onmousewheel=null; 
 					   }
 					}
+				}else{
+					document.body.onmousewheel=null;
 				}
 			    
 			   
@@ -535,8 +656,12 @@ $.fn.shineonScroll = function(options,fn)
 				{
 					$("body").append("<input type=\"hidden\" class=\""+settings.getfatherid+"\" id=\""+settings.getfatherid+"\" value=\""+sf+"\">");
 				}
+				$("#"+sf).attr("wheelxory",settings.wheelxory);
 				$("#"+settings.getfatherid).val(sf);
 				this.scrollings(settings);
+				this.addElement();
+				this.delElement();
+				this.onmouseclick();
 				this.scrollFunc(window);
 				if ((navigator.userAgent.match(/(iPhone|Android|iPad)/i)))
 				{
@@ -558,17 +683,20 @@ $.fn.shineonScroll = function(options,fn)
 					    {
 					    	if (navigator.userAgent.toLowerCase().match(/.(msie)/)!=null) 
 					    	{
-					    		settings.marginstep=200;
-					    		
 					    		if(!scrollflag)//避免鼠标或者手势滑动的同事执行滚轮事件
 					    		{
 					    			window.onmousewheel=document.onmousewheel=this.scrollFunc;//IE/Opera/Chrome/Safari
+					    			
 					    		}
+					    		
 							    var scrollflag=false;
 							    var startx=0;
 							    var starty=0;
 								document.getElementById(sf).onmousedown=function(e){ 
+									
 									var e=window.event||e;
+									e.returnValue = false;
+									$("#"+sf+" ."+sonc).css("transition","none");//soble
 									document.getElementById(sf).onselectstart=function (){return false;};
 									if($("#"+sf).height()>=$("#"+sf+" ."+sonc).height()||$("#"+sf).width()>$("#"+sf+" ."+sonc).width()){
 										return false;
@@ -584,104 +712,121 @@ $.fn.shineonScroll = function(options,fn)
 										startx=e.pageX;
 										starty=e.pageY;
 									}
-								}
-								document.getElementById(sf).onmousemove=function(e){
-									var e=window.event||e;
-									if(scrollflag)
-									{	
-										if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([9.]+)/) != null)
-										{
-											var xlength=e.clientX-startx;
-											var ylength=e.clientY-starty;
-										}
-										else
-										{
-											var xlength=e.pageX-startx;
-											var ylength=e.pageY-starty;
-										}
-										
-										
-										if(Math.abs(xlength)-Math.abs(ylength)>0){
-											if(settings.wheelxory=="wheelx")
-											{
-												wid_scroll_x_width = parseInt($("#"+sf+" ."+ssy).css("left"));
-												wid_e_s_wid = parseInt(wid_father-wid_scrollx);
-												//x方向
-												if(xlength>=0)
-										     	{//右
-											     	 settings["wheelval"]=1;
-											     	  if(parseInt($("#"+sf+" ."+sonc).css("margin-left"))>=0){
-											     	 	$("#"+sf+" ."+sonc).css("margin-left","0px");
-											     	 	$("#"+sf+" ."+ssy).css("left","0px");
-											     	 }
-											     	 else
-											     	 {
-											     	 	$("#"+sf+" ."+sonc).css("margin-left",(parseInt($("#"+sf+" ."+sonc).css("margin-left"))+Math.abs(xlength))+"px");
-											     	 	$("#"+sf+" ."+ssy).css("left",(wid_scroll_x_width+sms/((wid_soncontent-wid_father)/wid_e_s_wid))+"px");
-											     	 }
-											    }
-										     	else
-										     	{//左
-											     	 settings["wheelval"]=-1;
-											     	 if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))>=$("#"+sf+" ."+sonc).width()-$("#"+sf).width()){
-														$("#"+sf+" ."+sonc).css("margin-left",-($("#"+sf+" ."+sonc).width()-$("#"+sf).width())+"px");
-														$("#"+sf+" ."+ssy).css("left",($("#"+sf+" ."+ssymove).width()-$("#"+sf+" ."+ssy).width())+"px");
-													}
-													else
-													{
-														$("#"+sf+" ."+sonc).css("margin-left",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))-Math.abs(xlength))+"px");
-														$("#"+sf+" ."+ssy).css("left",(wid_scroll_x_width-sms/((wid_soncontent-wid_father)/wid_e_s_wid))+"px");
-													}
-											    }			
-											}							
-										}
-										else
-										{
-											hei_scroll_y_height = parseInt($("#"+sf+" ."+ssy).css("top"));
-											hei_e_s_y_hei       = parseInt(hei_father-hei_scrolly);
-											if(settings.wheelxory=="wheely")
-											{
-												//y方向
-												if(ylength>0){//下
-											     	 settings["wheelval"]=1;
-											     	  if(parseInt($("#"+sf+" ."+sonc).css("margin-top"))>=0){
-											     	 	$("#"+sf+" ."+sonc).css("margin-top","0px");
-											     	 	$("#"+sf+" ."+ssy).css("top","0px");
-											     	 }
-											     	 else
-											     	 {
-											     	 	$("#"+sf+" ."+sonc).css("margin-top",(parseInt($("#"+sf+" ."+sonc).css("margin-top"))+Math.abs(ylength))+"px");
-											     	 	//滚动条处理
-											     	 	//计算每1像素代表的实际距离   margintop/没1像素代表的实际距离（+-）步长
-											     	 	$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
-											     	 }
-											    }
-										     	else
-										     	{//上
-										     		 
-											     	settings["wheelval"]=-1;
-											     	// $("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
-													if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))>=$("#"+sf+" ."+sonc).height()-$("#"+sf).height()){
-														$("#"+sf+" ."+sonc).css("margin-top",-($("#"+sf+" ."+sonc).height()-$("#"+sf).height())+"px");
-														//$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
-														$("#"+sf+" ."+ssy).css("top",($("#"+sf+" ."+ssymove).height()-$("#"+sf+" ."+ssy).height())+"px");
-													}
-													else
-													{
-														$("#"+sf+" ."+sonc).css("margin-top",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))-Math.abs(ylength))+"px");
-														$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height-sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
-													}
-											     	
-											    }
-											}
+									document.onmouseup=function(e){
+										var e=window.event||e;
+										e.returnValue = false;
+										scrollflag=false;
+										document.onselectstart=null;
+										if(window[smscrollfn]){
+											window[smscrollfn](sf,settings["wheelval"]);
 										}
 									}
-									
+									document.getElementById(sf).onmousemove=function(e){
+										var e=window.event||e;
+										//(event.preventDefault) ? event.preventDefault() : event.returnValue = false;
+										e.returnValue = false;
+										if(scrollflag)
+										{	
+											
+											document.getElementById(sf).onselectstart=function (){return false;};
+											if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([9.]+)/) != null)
+											{
+												var xlength=e.clientX-startx;
+												var ylength=e.clientY-starty;
+											}
+											else
+											{
+												var xlength=e.pageX-startx;
+												var ylength=e.pageY-starty;
+											}
+											if(Math.abs(xlength)-Math.abs(ylength)>0){
+												if(settings.wheelxory=="wheelx")
+												{
+													var wid_scroll_x_widthbole = parseFloat($("#"+sf+" ."+ssy).css("left")),
+													wid_e_s_widbole = parseInt(wid_father-wid_scrollx);
+													var minstepbole = (wid_soncontent-wid_father)/wid_e_s_widbole;
+													wid_scrollwidthbole    = wid_scroll_x_widthbole*minstepbole;
+													//x方向
+													if(xlength>=0)
+											     	{//右
+												     	 settings["wheelval"]=1;
+												     	  if(parseInt($("#"+sf+" ."+sonc).css("margin-left"))>=0){
+												     	 	$("#"+sf+" ."+sonc).css("margin-left","0px");
+												     	 	$("#"+sf+" ."+ssy).css("left","0px");
+												     	 }
+												     	 else
+												     	 {
+												     	 	$("#"+sf+" ."+sonc).css("margin-left",(parseInt($("#"+sf+" ."+sonc).css("margin-left"))+smsbole)+"px");
+												     	 	$("#"+sf+" ."+ssy).css("left",((wid_scrollwidthbole-smsbole)/minstepbole)+"px");
+												     	 }
+												    }
+											     	else
+											     	{//左
+												     	 settings["wheelval"]=-1;
+												     	 if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))>=$("#"+sf+" ."+sonc).width()-$("#"+sf).width()){
+															$("#"+sf+" ."+sonc).css("margin-left",-($("#"+sf+" ."+sonc).width()-$("#"+sf).width())+"px");
+															$("#"+sf+" ."+ssy).css("left",($("#"+sf+" ."+ssymove).width()-$("#"+sf+" ."+ssy).width())+"px");
+														}
+														else
+														{
+															$("#"+sf+" ."+sonc).css("margin-left",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))-smsbole)+"px");
+															$("#"+sf+" ."+ssy).css("left",((wid_scrollwidthbole+smsbole)/minstepbole)+"px");
+														}
+												    }			
+												}							
+											}
+											else
+											{
+												var hei_scroll_y_heightbole = parseFloat($("#"+sf+" ."+ssy).css("top")),
+												hei_e_s_y_heibole       = parseInt(hei_father-hei_scrolly),//father-scollyhei
+												minstepbole = (hei_soncontent-hei_father)/hei_e_s_y_heibole,
+												hei_scrollheightbole    = hei_scroll_y_heightbole*minstepbole;
+												if(settings.wheelxory=="wheely")
+												{
+													//y方向
+													if(ylength>0){//下
+												     	 settings["wheelval"]=1;
+												     	if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))>=$("#"+sf+" ."+sonc).height()-$("#"+sf).height()){
+															$("#"+sf+" ."+sonc).css("margin-top",-($("#"+sf+" ."+sonc).height()-$("#"+sf).height())+"px");
+															$("#"+sf+" ."+ssy).css("top",($("#"+sf+" ."+ssymove).height()-$("#"+sf+" ."+ssy).height())+"px");
+														}
+														else
+														{
+															var margintop = parseInt($("#"+sf+" ."+sonc).css("margin-top"))-smsbole;
+															$("#"+sf+" ."+sonc).css("margin-top",margintop+"px");
+															$("#"+sf+" ."+ssy).css("top",((hei_scrollheightbole+smsbole)/minstepbole)+"px");
+														}
+												    }
+											     	else
+											     	{//上
+												     	settings["wheelval"]=-1;
+												     	if(parseInt($("#"+sf+" ."+sonc).css("margin-top"))>=0){
+												     	 	$("#"+sf+" ."+sonc).css("margin-top","0px");
+												     	 	$("#"+sf+" ."+ssy).css("top","0px");
+												     	 }
+												     	 else
+												     	 {
+												     	 	if((hei_scroll_y_heightbole-((hei_soncontent-hei_father)/hei_e_s_y_heibole)/smsbole)<=0)
+															{
+																$("#"+sf+" ."+ssy).css("top","0px");
+																$("#"+sf+" ."+sonc).css("margin-top","0px");
+															}
+															else
+															{
+																var margintop = parseInt($("#"+sf+" ."+sonc).css("margin-top"))+smsbole;
+														  		$("#"+sf+" ."+sonc).css("margin-top",margintop+"px");
+														  		$("#"+sf+" ."+ssy).css("top",((hei_scrollheightbole-smsbole)/minstepbole)+"px");
+															}
+												     	 	
+												     	 }	
+												    }
+												}
+											}
+										}	
+									}
 								}
-								document.onmouseup=function(){
-									scrollflag=false;
-									document.onselectstart=null;
-								}
+								
+								
 						    }
 					    	else
 					    	{
@@ -694,10 +839,6 @@ $.fn.shineonScroll = function(options,fn)
 					{
 						if (navigator.userAgent.toLowerCase().match(/.(msie)/)!=null) 
 					    	{
-					    		if(screen.width==1280){
-									settings.marginstep=200;
-								}
-					    		
 					    		if(!scrollflag)//避免鼠标或者手势滑动的同事执行滚轮事件
 					    		{
 					    			window.onmousewheel=document.onmousewheel=this.scrollFunc;//IE/Opera/Chrome/Safari
@@ -707,6 +848,8 @@ $.fn.shineonScroll = function(options,fn)
 							    var starty=0;
 								document.getElementById(sf).onmousedown=function(e){ 
 									var e=window.event||e;
+									e.returnValue = false;
+									$("#"+sf+" ."+sonc).css("transition","none");//soble
 									document.getElementById(sf).onselectstart=function (){return false;};
 									if($("#"+sf).height()>=$("#"+sf+" ."+sonc).height()||$("#"+sf).width()>$("#"+sf+" ."+sonc).width()){
 										return false;
@@ -722,111 +865,122 @@ $.fn.shineonScroll = function(options,fn)
 										startx=e.pageX;
 										starty=e.pageY;
 									}
-									
-								}
-								document.getElementById(sf).onmousemove=function(e){
-									var e=window.event||e;
-									if($("#"+sf).height()>=$("#"+sf+" ."+sonc).height()||$("#"+sf).width()>$("#"+sf+" ."+sonc).width()){
-										return false;
+									document.onmouseup=function(e){
+										var e=window.event||e;
+										//(event.preventDefault) ? event.preventDefault() : event.returnValue = false;
+										e.returnValue = false;
+										scrollflag=false;
+										document.onselectstart=null;
+										if(window[smscrollfn]){
+							window[smscrollfn](sf);
+						}
 									}
-									if(scrollflag)
-									{	
-										
-										if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(9|10).]+)/) != null)
-										{
-											var xlength=e.clientX-startx;
-											var ylength=e.clientY-starty;
+									document.getElementById(sf).onmousemove=function(e){
+										var e=window.event||e;
+										//(event.preventDefault) ? event.preventDefault() : event.returnValue = false;
+										e.returnValue = false;
+										if($("#"+sf).height()>=$("#"+sf+" ."+sonc).height()||$("#"+sf).width()>$("#"+sf+" ."+sonc).width()){
+											return false;
 										}
-										else
-										{
-											var xlength=e.pageX-startx;
-											var ylength=e.pageY-starty;
-										}
-										
-										
-										if(Math.abs(xlength)-Math.abs(ylength)>0){
-											if(settings.wheelxory=="wheelx")
+										if(scrollflag)
+										{	
+											document.getElementById(sf).onselectstart=function (){return false;};
+											if(navigator.userAgent.toLowerCase().match(/.(msie)[\/: ]([(9|10).]+)/) != null)
 											{
-												wid_scroll_x_width = parseInt($("#"+sf+" ."+ssy).css("left"));
-												wid_e_s_wid = parseInt(wid_father-wid_scrollx);
-												//x方向
-												if(xlength>=0)
-										     	{//右
-											     	 settings["wheelval"]=1;
-											     	  if(parseInt($("#"+sf+" ."+sonc).css("margin-left"))>=0){
-											     	 	$("#"+sf+" ."+sonc).css("margin-left","0px");
-											     	 	$("#"+sf+" ."+ssy).css("left","0px");
-											     	 }
-											     	 else
-											     	 {
-											     	 	$("#"+sf+" ."+sonc).css("margin-left",(parseInt($("#"+sf+" ."+sonc).css("margin-left"))+Math.abs(xlength))+"px");
-											     	 	$("#"+sf+" ."+ssy).css("left",(wid_scroll_x_width+sms/((wid_soncontent-wid_father)/wid_e_s_wid))+"px");
-											     	 }
-											    }
-										     	else
-										     	{//左
-											     	 settings["wheelval"]=-1;
-											     	 if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))>=$("#"+sf+" ."+sonc).width()-$("#"+sf).width()){
-														$("#"+sf+" ."+sonc).css("margin-left",-($("#"+sf+" ."+sonc).width()-$("#"+sf).width())+"px");
-														$("#"+sf+" ."+ssy).css("left",($("#"+sf+" ."+ssymove).width()-$("#"+sf+" ."+ssy).width())+"px");
-													}
-													else
-													{
-														$("#"+sf+" ."+sonc).css("margin-left",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))-Math.abs(xlength))+"px");
-														$("#"+sf+" ."+ssy).css("left",(wid_scroll_x_width-sms/((wid_soncontent-wid_father)/wid_e_s_wid))+"px");
-													}
-											    }
-											    //_this.scrollings(settings);				
-											}							
-										}
-										else
-										{
-											hei_scroll_y_height = parseInt($("#"+sf+" ."+ssy).css("top"));
-											hei_e_s_y_hei       = parseInt(hei_father-hei_scrolly);
-											if(settings.wheelxory=="wheely")
+												var xlength=e.clientX-startx;
+												var ylength=e.clientY-starty;
+											}
+											else
 											{
-												//console.log(parseInt($("#"+sf+" ."+sonc).css("margin-top")))
+												var xlength=e.pageX-startx;
+												var ylength=e.pageY-starty;
+											}
 											
-												//y方向
-												if(ylength>0){//下
-													
-											     	 settings["wheelval"]=1;
-											     	  if(parseInt($("#"+sf+" ."+sonc).css("margin-top"))>=0){
-											     	 	$("#"+sf+" ."+sonc).css("margin-top","0px");
-											     	 	$("#"+sf+" ."+ssy).css("top","0px");
-											     	 }
-											     	 else
-											     	 {
-											     	 	$("#"+sf+" ."+sonc).css("margin-top",(parseInt($("#"+sf+" ."+sonc).css("margin-top"))+Math.abs(ylength))+"px");
-											     	 	//滚动条处理
-											     	 	//计算每1像素代表的实际距离   margintop/没1像素代表的实际距离（+-）步长
-											     	 	$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height+sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
-											     	 }
-											    }
-										     	else
-										     	{//上
-										     		 
-											     	settings["wheelval"]=-1;
-													if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))>=$("#"+sf+" ."+sonc).height()-$("#"+sf).height()){
-														$("#"+sf+" ."+sonc).css("margin-top",-($("#"+sf+" ."+sonc).height()-$("#"+sf).height())+"px");
-														$("#"+sf+" ."+ssy).css("top",($("#"+sf+" ."+ssymove).height()-$("#"+sf+" ."+ssy).height())+"px");
-													}
-													else
-													{
-														$("#"+sf+" ."+sonc).css("margin-top",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))-Math.abs(ylength))+"px");
-														$("#"+sf+" ."+ssy).css("top",(hei_scroll_y_height-sms/((hei_soncontent-hei_father)/hei_e_s_y_hei))+"px");
-													}
-											     	
-											    }
-											}	
+											
+											if(Math.abs(xlength)-Math.abs(ylength)>0){
+												if(settings.wheelxory=="wheelx")
+												{
+													var wid_scroll_x_widthbole = parseFloat($("#"+sf+" ."+ssy).css("left")),
+													wid_e_s_widbole = parseInt(wid_father-wid_scrollx);
+													var minstepbole = (wid_soncontent-wid_father)/wid_e_s_widbole,
+													hei_scrollwidbole    = wid_scroll_x_widthbole*minstepbole;
+													//x方向
+													if(xlength>=0)
+											     	{//右
+												     	 settings["wheelval"]=1;
+												     	  if(parseInt($("#"+sf+" ."+sonc).css("margin-left"))>=0){
+												     	 	$("#"+sf+" ."+sonc).css("margin-left","0px");
+												     	 	$("#"+sf+" ."+ssy).css("left","0px");
+												     	 }
+												     	 else
+												     	 {
+												     	 	$("#"+sf+" ."+sonc).css("margin-left",(parseInt($("#"+sf+" ."+sonc).css("margin-left"))+sms)+"px");
+												     	 	$("#"+sf+" ."+ssy).css("left",((hei_scrollwidbole-sms)/minstepbole)+"px");
+												     	 }
+												    }
+											     	else
+											     	{//左
+												     	 settings["wheelval"]=-1;
+												     	 if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))>=$("#"+sf+" ."+sonc).width()-$("#"+sf).width()){
+															$("#"+sf+" ."+sonc).css("margin-left",-($("#"+sf+" ."+sonc).width()-$("#"+sf).width())+"px");
+															$("#"+sf+" ."+ssy).css("left",($("#"+sf+" ."+ssymove).width()-$("#"+sf+" ."+ssy).width())+"px");
+														}
+														else
+														{
+															$("#"+sf+" ."+sonc).css("margin-left",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))-sms)+"px");
+															$("#"+sf+" ."+ssy).css("left",((hei_scrollwidbole+sms)/minstepbole)+"px");
+														}
+												    }
+												    //_this.scrollings(settings);				
+												}							
+											}
+											else
+											{
+												var hei_scroll_y_heightbole = parseFloat($("#"+sf+" ."+ssy).css("top")),
+												hei_e_s_y_heibole       = parseInt(hei_father-hei_scrolly);
+												var minstepbole = (hei_soncontent-hei_father)/hei_e_s_y_heibole,
+												hei_scrollheightbole    = hei_scroll_y_heightbole*minstepbole;
+												if(settings.wheelxory=="wheely")
+												{
+													//y方向
+													if(ylength>0){//下
+														
+												     	 settings["wheelval"]=1;
+												     	  if(parseInt($("#"+sf+" ."+sonc).css("margin-top"))>=0){
+												     	 	$("#"+sf+" ."+sonc).css("margin-top","0px");
+												     	 	$("#"+sf+" ."+ssy).css("top","0px");
+												     	 }
+												     	 else
+												     	 {
+												     	 	$("#"+sf+" ."+sonc).css("margin-top",(parseInt($("#"+sf+" ."+sonc).css("margin-top"))+sms)+"px");
+												     	 	//滚动条处理
+												     	 	//计算每1像素代表的实际距离   margintop/没1像素代表的实际距离（+-）步长
+												     	 $("#"+sf+" ."+ssy).css("top",((hei_scrollheightbole-sms)/minstepbole)+"px");
+												     	 }
+												    }
+											     	else
+											     	{//上
+											     		 
+												     	settings["wheelval"]=-1;
+														if(Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))>=$("#"+sf+" ."+sonc).height()-$("#"+sf).height()){
+															$("#"+sf+" ."+sonc).css("margin-top",-($("#"+sf+" ."+sonc).height()-$("#"+sf).height())+"px");
+															$("#"+sf+" ."+ssy).css("top",($("#"+sf+" ."+ssymove).height()-$("#"+sf+" ."+ssy).height())+"px");
+														}
+														else
+														{
+															$("#"+sf+" ."+sonc).css("margin-top",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-top")))-sms)+"px");
+															$("#"+sf+" ."+ssy).css("top",((hei_scrollheightbole+sms)/minstepbole)+"px");
+														}
+												     	
+												    }
+												}	
+											}
 										}
+										
 									}
 									
 								}
-								document.onmouseup=function(){
-									scrollflag=false;
-									document.onselectstart=null;
-								}
+								
 								if(window.onmousewheel||document.onmousewheel){//监听滚轮事件，如果ie有，则执行
 									_this.scrollings(settings);
 								}
@@ -850,8 +1004,6 @@ $.fn.shineonScroll = function(options,fn)
 					$("#"+settings["father"]+" ."+settings["soncontent"]).css("margin-top",-margintop+"px");
 					$("#"+settings["father"]+" ."+settings["scroll_y"]).css("top",scrolltop+"px");
 				}
-
-				
 			};
 			this.init(settings);
 	}
