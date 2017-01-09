@@ -25,10 +25,10 @@ $.fn.shineonScroll = function(options,fn)
 			"resetinit":0,//0代表不做处理，1代表重置
 			"scrolltarget":".scrollfather",//鼠标滑动，标记父元素
 			"smscrollfnprev":"phone_",//手机端滚动回调方法前缀
+			"boleonclick":true,//触屏设备在终端chrome浏览器,强制转到touch监听
 		};
 		
 		var settings = $.extend({},defaults,options);
-
 		this.sets=settings;
 		this.clickfatherid="";
 		//y轴的高度计算:父元素高度-父元素的高度除以子元素总高；
@@ -72,6 +72,7 @@ $.fn.shineonScroll = function(options,fn)
 		    smsbole     = settings.marginstepbole,
 		    smscrollfnprv = settings.smscrollfnprev,
 		    smscrollfn = smscrollfnprv+sf,
+		    smsboleonclick = settings.boleonclick,
 		    scrolltarget = settings.scrolltarget;
 		    if(sms==true||sms=="true"){
 		    	sms = $("#"+sf+" ."+sonc).height()/$("#"+sf).height()*5;
@@ -79,6 +80,9 @@ $.fn.shineonScroll = function(options,fn)
 		    		sms = 5;
 		    	}
 		    }
+		    if(smsboleonclick){//终端为移动设备，嵌套浏览器touch
+				sms = smsbole
+			}
 		    if(settings["resetinit"])
 		    {
 		    	if(settings["wheelxory"]=="wheely")
@@ -185,12 +189,10 @@ $.fn.shineonScroll = function(options,fn)
 				{
 					$("#"+sf+" ."+ssx).hide();
 					$("#"+sf+" ."+ssxmove).hide();
-					
 				}
 			}else{
 				throw new Error("未能正确获取（"+sf+"）的offset()");
 			}
-			
 			if(settings.wheelxory=="wheely")
 			{
 				//执行一次mousemove事件
@@ -622,7 +624,7 @@ $.fn.shineonScroll = function(options,fn)
 				     xlength    = x-startX;
 				   
 				     if(Math.abs(ylength)>Math.abs(xlength))
-				     {
+				     {//垂直方向
 				     	if(ylength>=0){
 					     	 settings["wheelval"]=1;
 					    }
@@ -633,7 +635,7 @@ $.fn.shineonScroll = function(options,fn)
 						_this.scrollings(settings);
 				     }
 				     else
-				     {
+				     {//水平方向
 				     	if(xlength>=0)
 				     	{
 					     	 settings["wheelval"]=1;
@@ -663,7 +665,7 @@ $.fn.shineonScroll = function(options,fn)
 				this.delElement();
 				this.onmouseclick();
 				this.scrollFunc(window);
-				if ((navigator.userAgent.match(/(iPhone|Android|iPad)/i)))
+				if ((navigator.userAgent.match(/(iPhone|Android|iPad)/i))||smsboleonclick)
 				{
 					var listenid=document.getElementById(sf);
 					listenid.addEventListener("touchstart",this.touchStart, false);
@@ -930,8 +932,7 @@ $.fn.shineonScroll = function(options,fn)
 															$("#"+sf+" ."+sonc).css("margin-left",(-Math.abs(parseInt($("#"+sf+" ."+sonc).css("margin-left")))-sms)+"px");
 															$("#"+sf+" ."+ssy).css("left",((hei_scrollwidbole+sms)/minstepbole)+"px");
 														}
-												    }
-												    //_this.scrollings(settings);				
+												    }				
 												}							
 											}
 											else
