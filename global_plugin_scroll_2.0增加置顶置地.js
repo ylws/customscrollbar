@@ -25,7 +25,7 @@ $.fn.shineonScroll = function(options,fn)
 			"resetinit":0,//0代表不做处理，1代表重置
 			"scrolltarget":".scrollfather",//鼠标滑动，标记父元素
 			"smscrollfnprev":"phone_",//手机端滚动回调方法前缀
-			"boleonclick":true,//触屏设备在终端chrome浏览器,强制转到touch监听
+			"boleonclick":false,//触屏设备在终端chrome浏览器,强制转到touch监听
 		};
 		
 		var settings = $.extend({},defaults,options);
@@ -599,7 +599,7 @@ $.fn.shineonScroll = function(options,fn)
 			{
 				var ev    = window.event || e;
 				//阻止网页默认动作（即网页滚动）
-			    ev.preventDefault();
+			    //ev.preventDefault();
 			    var touch = ev.touches[0], //获取第一个触点
 			    x         = Number(touch.pageX), //页面触点X坐标
 			    y         = Number(touch.pageY); //页面触点Y坐标
@@ -650,7 +650,7 @@ $.fn.shineonScroll = function(options,fn)
 			this.touchEnd=function(e) 
 			{
 				var ev    = window.event || e;
-			    ev.preventDefault();
+			   // ev.preventDefault();
 			};
 			this.init=function(settings)
 			{
