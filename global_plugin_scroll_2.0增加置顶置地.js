@@ -23,7 +23,7 @@ $.fn.shineonScroll = function(options) {
 		"resetinit": 0, //0代表不做处理，1代表重置
 		"scrolltarget": ".scrollfather", //鼠标滑动，标记父元素
 		"smscrollfnprev": "phone_", //手机端滚动回调方法前缀
-		"boleonclick": false, //触屏设备在终端chrome浏览器,强制转到touch监听
+		"boleonclick": false, //触屏设备在终端chrome浏览器,强制转到touch监听，并添加滚轮监听
 		"scrollbottomfn": "topmax", //top值滚动到底部
 		/*
 			var count = 0;
@@ -659,6 +659,13 @@ $.fn.shineonScroll = function(options) {
 			listenid.addEventListener("touchstart", this.touchStart, false);
 			listenid.addEventListener("touchmove", this.touchMove, false);
 			listenid.addEventListener("touchend", this.touchEnd, false);
+			if(smsboleonclick){
+				if(navigator.userAgent.toLowerCase().match(/firefox/) != null) {
+					document.addEventListener('DOMMouseScroll', this.scrollFunc, false);
+				} else {
+					window.onmousewheel = document.onmousewheel = this.scrollFunc;
+				}
+			}
 		} else {
 			/*注册事件web端*/
 			if(document.addEventListener) { //W3C
