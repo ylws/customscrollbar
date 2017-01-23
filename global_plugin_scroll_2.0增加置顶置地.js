@@ -23,7 +23,7 @@ $.fn.shineonScroll = function(options) {
 		"resetinit": 0, //0代表不做处理，1代表重置
 		"scrolltarget": ".scrollfather", //鼠标滑动，标记父元素
 		"smscrollfnprev": "phone_", //手机端滚动回调方法前缀
-		"boleonclick": false, //触屏设备在终端chrome浏览器,强制转到touch监听，并添加滚轮监听
+		"boleonclick": false, //触屏设备在终端chrome浏览器,强制转到touch监听,并添加滚轮监听
 		"scrollbottomfn": "topmax", //top值滚动到底部
 		/*
 			var count = 0;
@@ -171,7 +171,14 @@ $.fn.shineonScroll = function(options) {
 					return false
 				};
 			} else {
-				document.body.onmousewheel = null;
+				if(top.location.href != location.href){
+					document.body.onmousewheel = function() {
+						return false
+					};
+				}else{
+					document.body.onmousewheel = null;
+				}
+				
 			}
 			smscrollfn = smscrollfnprv + idval;
 
@@ -355,18 +362,16 @@ $.fn.shineonScroll = function(options) {
 						e.cancelBubble = true;
 					}
 					if(flag) {
-
 						sfleft = $("#" + sf).offset().left;
 						sftop = $("#" + sf).offset().top;
 						eleft = e.pageX || e.clientX;
 						etop = e.pageY || e.clientY;
 						if(eleft < (sfleft + sfwid) && eleft > sfleft && etop > sftop && etop < (sftop + sfhei)) {
-
 							if($("#" + sf + " ." + ssy).attr("unorbind") == "bind") {
 								var hei_scrolly = $("#" + sf + " ." + ssy).height();
 								//y轴
 								hei_scroll_y_height = parseInt($("#" + sf + " ." + ssy).css("top"));
-								hei_nowposition_y_up = e.pageY; //获取移动点的坐标
+								hei_nowposition_y_up = e.pageY||e.clientY; //获取移动点的坐标
 								hei_scrolltop_y = hei_nowposition_y_up - hei_f_offhei - hei_click_top;
 								hei_e_s_y_hei = hei_father - hei_scrolly;
 								hei_soncontent = $("#" + sf + " ." + sonc).height(); //鼠标移动到两个同时存在的模拟滚动条时，会被覆盖掉，需重置
@@ -455,7 +460,7 @@ $.fn.shineonScroll = function(options) {
 								var wid_scrollx = $("#" + sf + " ." + ssx).width();
 								//x轴
 								wid_scroll_x_width = parseInt($("#" + sf + " ." + ssx).css("left"));
-								wid_np_x_left = e.pageX; //获取移动点的坐标
+								wid_np_x_left = e.pageX|| e.clientX; //获取移动点的坐标
 								wid_scrollleft_x = wid_np_x_left - wid_f_offwid - wid_click_left;
 								wid_e_s_wid = wid_father - wid_scrollx;
 								wid_soncontent = $("#" + sf + " ." + sonc).width(); //鼠标移动到两个同时存在的模拟滚动条时，会被覆盖掉，需重置
@@ -532,21 +537,29 @@ $.fn.shineonScroll = function(options) {
 
 		var settings = _this.sets,
 			funx, funy, fatherx, fathery;
-		funx = ev.pageX;
-		funy = ev.pageY;
+		funx = ev.pageX||ev.clientX;
+		funy = ev.pageY||ev.clientY;
 
 		$("." + settings["soncontent"]).mouseover(function(e) {
 			$("#" + settings["getfatherid"]).val($(this).parents(scrolltarget).attr("id"));
 			idval = $("#" + settings["getfatherid"]).val()
 			settings.wheelxory = $("#" + idval).attr("wheelxory");
-			funx = e.pageX;
-			funy = e.pageY;
+			funx = ev.pageX||ev.clientX;
+			funy = ev.pageY||ev.clientY;
 			if(($("#" + idval).height() > $(this).height() && settings.wheelxory == "wheely") || ($("#" + idval).width() > $(this).width() && settings.wheelxory == "wheelx")) {
 				document.body.onmousewheel = function() {
 					return false
 				};
 			} else {
-				document.body.onmousewheel = null;
+				
+				if(top.location.href != location.href){
+					document.body.onmousewheel = function() {
+						return false
+					};
+				}else{
+					document.body.onmousewheel = null;
+				}
+				
 			}
 			smscrollfn = smscrollfnprv + idval;
 		});
@@ -829,6 +842,7 @@ $.fn.shineonScroll = function(options) {
 					var startx = 0;
 					var starty = 0;
 					document.getElementById(sf).onmousedown = function(e) {
+						alert("B")
 						var e = window.event || e;
 						e.returnValue = false;
 						$("#" + sf + " ." + sonc).css("transition", "none"); //soble
