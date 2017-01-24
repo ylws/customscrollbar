@@ -123,6 +123,9 @@ $.fn.shineonScroll = function(options) {
 		}
 		return;
 	}
+	if($("#" + sf).css("display")=="none"){//如果一开始为隐藏，则不再进行下面的操作
+		return false;
+	}
 	if($("#" + sf).offset() != undefined) {
 		//y轴
 		hei_f_offhei = $("#" + sf).offset()['top'];
