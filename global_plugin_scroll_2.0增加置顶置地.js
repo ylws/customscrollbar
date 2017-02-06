@@ -164,12 +164,11 @@ $.fn.shineonScroll = function(options) {
 	}
 	this.scrollings = function(settings) {
 		var idval = ""; //获取当前鼠标指向元素的id也就是settings['father']
-
 		$("." + settings["soncontent"]).mouseover(function() {
 			$("#" + settings["getfatherid"]).val($(this).parents(scrolltarget).attr("id"));
 			idval = $("#" + settings["getfatherid"]).val();
 			settings.wheelxory = $("#" + idval).attr("wheelxory");
-			if(($("#" + idval).height() > $(this).height() && settings.wheelxory == "wheely") || ($("#" + idval).width() > $(this).width() && settings.wheelxory == "wheelx")) {
+			if(($("#" + idval).height() < $(this).height() && settings.wheelxory == "wheely") || ($("#" + idval).width() < $(this).width() && settings.wheelxory == "wheelx")) {
 				document.body.onmousewheel = function() {
 					return false
 				};
@@ -554,7 +553,6 @@ $.fn.shineonScroll = function(options) {
 					return false
 				};
 			} else {
-				
 				if(top.location.href != location.href){
 					document.body.onmousewheel = function() {
 						return false
@@ -568,7 +566,9 @@ $.fn.shineonScroll = function(options) {
 		});
 		sf = $("#" + settings["getfatherid"]).val();
 		if(($("#" + sf).height() < $("#" + sf + " ." + sonc).height() && settings.wheelxory == "wheely") || ($("#" + sf).width() < $("#" + sf + " ." + sonc).width() && settings.wheelxory == "wheelx")) {
-
+			document.body.onmousewheel = function() {
+				return false
+			};
 			if(document.getElementById(sf).offsetTop != undefined) {
 				fathery = $("#" + sf).offset()['top'];
 				fatherx = $("#" + sf).offset()['left'];
