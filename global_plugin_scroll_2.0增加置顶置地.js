@@ -549,7 +549,7 @@ $.fn.shineonScroll = function(options) {
 			settings.wheelxory = $("#" + idval).attr("wheelxory");
 			funx = ev.pageX||ev.clientX;
 			funy = ev.pageY||ev.clientY;
-			if(($("#" + idval).height() > $(this).height() && settings.wheelxory == "wheely") || ($("#" + idval).width() > $(this).width() && settings.wheelxory == "wheelx")) {
+			if(($("#" + idval).height() < $(this).height() && settings.wheelxory == "wheely") || ($("#" + idval).width() < $(this).width() && settings.wheelxory == "wheelx")) {
 				document.body.onmousewheel = function() {
 					return false
 				};
