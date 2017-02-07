@@ -169,19 +169,12 @@ $.fn.shineonScroll = function(options) {
 			$("#" + settings["getfatherid"]).val($(this).parents(scrolltarget).attr("id"));
 			idval = $("#" + settings["getfatherid"]).val();
 			settings.wheelxory = $("#" + idval).attr("wheelxory");
-			if(($("#" + idval).height() < $(this).height() && settings.wheelxory == "wheely") || ($("#" + idval).width() < $(this).width() && settings.wheelxory == "wheelx")) {
+			if(($("#" + idval).height() < $(this).height() && settings.wheelxory == "wheely") ||($("#" + idval).height() > $(this).height() && settings.wheelxory == "wheely" && top.location.href != location.href) || ($("#" + idval).width() < $(this).width() && settings.wheelxory == "wheelx")|| ($("#" + idval).width() > $(this).width() && settings.wheelxory == "wheelx" && top.location.href != location.href)) {
 				document.body.onmousewheel = function() {
 					return false
 				};
 			} else {
-				if(top.location.href != location.href){
-					document.body.onmousewheel = function() {
-						return false
-					};
-				}else{
-					document.body.onmousewheel = null;
-				}
-				
+				document.body.onmousewheel = null;
 			}
 			smscrollfn = smscrollfnprv + idval;
 
@@ -549,24 +542,17 @@ $.fn.shineonScroll = function(options) {
 			settings.wheelxory = $("#" + idval).attr("wheelxory");
 			funx = ev.pageX||ev.clientX;
 			funy = ev.pageY||ev.clientY;
-			if(($("#" + idval).height() < $(this).height() && settings.wheelxory == "wheely") || ($("#" + idval).width() < $(this).width() && settings.wheelxory == "wheelx")) {
+			if(($("#" + idval).height() < $(this).height() && settings.wheelxory == "wheely") ||($("#" + idval).height() > $(this).height() && settings.wheelxory == "wheely" && top.location.href != location.href) || ($("#" + idval).width() < $(this).width() && settings.wheelxory == "wheelx")|| ($("#" + idval).width() > $(this).width() && settings.wheelxory == "wheelx" && top.location.href != location.href)) {
 				document.body.onmousewheel = function() {
 					return false
 				};
 			} else {
-				if(top.location.href != location.href){
-					document.body.onmousewheel = function() {
-						return false
-					};
-				}else{
-					document.body.onmousewheel = null;
-				}
-				
+				document.body.onmousewheel = null;
 			}
 			smscrollfn = smscrollfnprv + idval;
 		});
 		sf = $("#" + settings["getfatherid"]).val();
-		if(($("#" + sf).height() < $("#" + sf + " ." + sonc).height() && settings.wheelxory == "wheely") || ($("#" + sf).width() < $("#" + sf + " ." + sonc).width() && settings.wheelxory == "wheelx")) {
+		if(($("#" + sf).height() < $("#" + sf + " ." + sonc).height() && settings.wheelxory == "wheely") ||($("#" + sf).height() > $("#" + sf + " ." + sonc).height() && settings.wheelxory == "wheely" && top.location.href != location.href) || ($("#" + sf).width() < $("#" + sf + " ." + sonc).width() && settings.wheelxory == "wheelx")||($("#" + sf).width() > $("#" + sf + " ." + sonc).width() && settings.wheelxory == "wheelx" && top.location.href != location.href)) {
 			document.body.onmousewheel = function() {
 				return false
 			};
