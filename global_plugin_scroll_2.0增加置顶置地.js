@@ -160,7 +160,8 @@ $.fn.shineonScroll = function(options) {
 
 		}
 	} else {
-		throw new Error("未能正确获取（" + sf + "）的offset()");
+		//throw new Error("未能正确获取（" + sf + "）的offset()");
+		return false;
 	}
 	this.scrollings = function(settings) {
 		var idval = ""; //获取当前鼠标指向元素的id也就是settings['father']
