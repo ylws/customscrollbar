@@ -24,7 +24,7 @@ $.fn.shineonScroll = function(options) {
 		"scrolltarget": ".scrollfather", //鼠标滑动，标记父元素
 		"smscrollfnprev": "phone_", //手机端滚动回调方法前缀
 		"boleonclick": false, //触屏设备在终端chrome浏览器,强制转到touch监听,并添加滚轮监听
-		"scrollbottomfn": "topmax", //top值滚动到底部
+		"scrollbottomfn": "topmax" //top值滚动到底部
 		/*
 			var count = 0;
 			function topmax(scrollobj){
