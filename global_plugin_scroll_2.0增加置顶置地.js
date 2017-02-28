@@ -689,6 +689,13 @@ $.fn.shineonScroll = function(options) {
 						document.getElementById(sf).onmousedown = function(e) {
 							scrollflag = false;
 							var e = window.event || e;
+							//获取焦点ie9/10中，对于input,textarea点击失效，绑定获取焦点事件
+							$("#"+sf+" input").click(function(){
+								$(this).focus();
+							})
+							$("#"+sf+" textarea").click(function(){
+								$(this).focus();
+							})
 							e.returnValue = false;
 							$("#" + sf + " ." + sonc).css("transition", "none"); //soble
 							document.getElementById(sf).onselectstart = function() {
@@ -832,7 +839,6 @@ $.fn.shineonScroll = function(options) {
 					var startx = 0;
 					var starty = 0;
 					document.getElementById(sf).onmousedown = function(e) {
-						alert("B")
 						var e = window.event || e;
 						e.returnValue = false;
 						$("#" + sf + " ." + sonc).css("transition", "none"); //soble
