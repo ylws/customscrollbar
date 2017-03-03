@@ -349,22 +349,17 @@ $.fn.shineonScroll = function(options) {
 					}
 				});
 				var sfleft, sftop, eleft, etop;
-
-				$("#" + sf).mousemove(function(e) {
-					e = window.event || e;
-					if(e.preventDefault) {
-						e.preventDefault();
-						e.stopPropagation();
-					} else {
-						e.returnValue = false;
-						e.cancelBubble = true;
-					}
-					if(flag) {
-						sfleft = $("#" + sf).offset().left;
-						sftop = $("#" + sf).offset().top;
-						eleft = e.pageX || e.clientX;
-						etop = e.pageY || e.clientY;
-						if(eleft < (sfleft + sfwid) && eleft > sfleft && etop > sftop && etop < (sftop + sfhei)) {
+				if(flag) {
+					$(document).mousemove(function(e) {
+						e = window.event || e;
+						if(e.preventDefault) {
+							e.preventDefault();
+							e.stopPropagation();
+						} else {
+							e.returnValue = false;
+							e.cancelBubble = true;
+						}
+						
 							if($("#" + sf + " ." + ssy).attr("unorbind") == "bind") {
 								var hei_scrolly = $("#" + sf + " ." + ssy).height();
 								//y轴
@@ -391,27 +386,18 @@ $.fn.shineonScroll = function(options) {
 									$("#" + sf + " ." + sonc).css("margin-top", -hei_scrollheight + "px");
 								}
 							}
-						} else {
-							document.body.onmousewheel = null;
-							$("#" + sf + " ." + ssy).attr("unorbind", "unbind");
-							$("#" + sf + " ." + ssx).attr("unorbind", "unbind");
-							flag = false;
-						}
-					} else {
+						
+	
+					})
+				} else {
 						document.body.onmousewheel = null;
 					}
-
-				})
-				$("#" + sf).mouseout(function() {
-					$("#" + sf + " ." + ssy).attr("unorbind", "unbind");
-					$("#" + sf + " ." + ssx).attr("unorbind", "unbind");
-					flag = false;
-				})
 
 			});
 
 			//x轴
 			$("#" + sf + " ." + ssx).mousedown(function(e) {
+				e = window.event || e;
 				if(e.preventDefault) {
 					e.preventDefault();
 				} else {
@@ -438,22 +424,17 @@ $.fn.shineonScroll = function(options) {
 						window[smscrollfn](sf, settings["wheelval"]);
 					}
 				});
-				$("#" + sf).mousemove(function(e) {
-					var e = window.event || e;
-					if(e.preventDefault) {
-						e.preventDefault();
-						e.stopPropagation();
-					} else {
-						e.returnValue = false;
-						e.cancelBubble = true;
-					}
-					if(flag) {
-						var sfleft = $("#" + sf).offset().left;
-						var sftop = $("#" + sf).offset().top;
-						var eleft = e.pageX || e.clientX;
-						var etop = e.pageY || e.clientY;
-						if(eleft < (sfleft + sfwid) && eleft > sfleft && etop > sftop && etop < (sftop + sfhei)) {
-
+				if(flag) {
+					$(document).mousemove(function(e) {
+						var e = window.event || e;
+						if(e.preventDefault) {
+							e.preventDefault();
+							e.stopPropagation();
+						} else {
+							e.returnValue = false;
+							e.cancelBubble = true;
+						}
+						
 							if($("#" + sf + " ." + ssx).attr("unorbind") == "bind") {
 								var wid_scrollx = $("#" + sf + " ." + ssx).width();
 								//x轴
@@ -475,7 +456,7 @@ $.fn.shineonScroll = function(options) {
 										if(window[smsscrollbottomfn]) {
 											settings.deloradd = "adddel";
 											window[smsscrollbottomfn](_this);
-
+	
 										}
 									} else {
 										$("#" + sf + " ." + ssx).css("left", wid_scrollleft_x + "px");
@@ -483,22 +464,12 @@ $.fn.shineonScroll = function(options) {
 									}
 								}
 							}
-						} else {
-							document.body.onmousewheel = null;
-							$("#" + sf + " ." + ssy).attr("unorbind", "unbind");
-							$("#" + sf + " ." + ssx).attr("unorbind", "unbind");
-							flag = false;
-						}
-					} else {
-						document.body.onmousewheel = null;
-					}
-
-				});
-				$("#" + sf).mouseout(function() {
-					$("#" + sf + " ." + ssy).attr("unorbind", "unbind");
-					$("#" + sf + " ." + ssx).attr("unorbind", "unbind");
-					flag = false;
-				})
+						
+	
+					});
+				} else {
+					document.body.onmousewheel = null;
+				}
 			});
 
 		};
