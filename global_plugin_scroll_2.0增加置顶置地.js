@@ -23,6 +23,7 @@ $.fn.shineonScroll = function(options) {
 		"resetinit": 0, //0代表不做处理，1代表重置
 		"scrolltarget": ".scrollfather", //鼠标滑动，标记父元素
 		"smscrollfnprev": "phone_", //手机端滚动回调方法前缀
+		"touchpreventDefault":false,//是否开启移动端禁用滚动条
 		"boleonclick": false, //触屏设备在终端chrome浏览器,强制转到touch监听,并添加滚轮监听
 		"scrollbottomfn": "topmax" //top值滚动到底部
 		/*
@@ -103,6 +104,7 @@ $.fn.shineonScroll = function(options) {
 		smscrollfn = smscrollfnprv + sf,
 		smsboleonclick = settings.boleonclick,
 		smsscrollbottomfn = settings.scrollbottomfn,
+		touchpreventDefault= settings.touchpreventDefault,
 		scrolltarget = settings.scrolltarget;
 	if(sms == true || sms == "true") {
 		sms = $("#" + sf + " ." + sonc).height() / $("#" + sf).height() * 5;
@@ -598,35 +600,48 @@ $.fn.shineonScroll = function(options) {
 	//移动端监听
 	this.touchStart = function(e) {
 		var ev = window.event || e;
-		var idval = "";
+		//阻止网页默认动作（即网页滚动）
+		if(touchpreventDefault){
+			 $("body").bind("touchstart",function(e){
+			 	var ev = window.event || e;
+				 ev.preventDefault();
+				 ev.stopPropagation();
+			})
+		}
 		$("#" + settings["getfatherid"]).val($(this).attr("id"));
 		settings.wheelxory = $(this).attr("wheelxory");
 		settings.father = $(this).attr("id");
-		//阻止网页默认动作（即网页滚动）
-		//ev.preventDefault();
 		var touch = ev.touches[0], //获取第一个触点
 			x = Number(touch.pageX), //页面触点X坐标
 			y = Number(touch.pageY); //页面触点Y坐标
 		//记录触点初始位置
 		startX = x;
 		startY = y;
-
+		lastX = x;
+		lastY = y;
+		
 	};
 	this.touchMove = function(e) {
 		var ev = window.event || e;
 		var father = $("#" + settings["getfatherid"]).val();
-
 		if(($("#" + father).height() >= $("#" + father + " ." + sonc).height() && settings.wheelxory == "wheely") || ($("#" + father).width() > $("#" + father + " ." + sonc).width() && settings.wheelxory == "wheelx")) {
 			return false;
 		}
-		//ev.preventDefault();
+		if(touchpreventDefault){
+			 $("body").bind("touchmove",function(e){
+			 	var ev = window.event || e;
+				 ev.preventDefault();
+				 ev.stopPropagation();
+			})
+		}
 		var touch = ev.touches[0], //获取第一个触点
 			x = Number(touch.pageX), //页面触点X坐标
 			y = Number(touch.pageY), //页面触点Y坐标
 			thisval, ylength, xlength;
 		ylength = y - startY;
 		xlength = x - startX;
-
+		lastX = x;
+		lastY = y;
 		if(Math.abs(ylength) > Math.abs(xlength)) { //垂直方向
 			if(ylength >= 0) {
 				settings["wheelval"] = 1;
@@ -644,8 +659,19 @@ $.fn.shineonScroll = function(options) {
 		}
 	};
 	this.touchEnd = function(e) {
+		
 		var ev = window.event || e;
-		// ev.preventDefault();
+		var father = $("#" + settings["getfatherid"]).val();
+		var touchpreventDefaultflag = true;
+		
+		if(Math.abs(lastY)-Math.abs(startY)>=5|| Math.abs(lastX)-Math.abs(startX)>=5){
+			touchpreventDefaultflag = false;
+		}
+		$("body").unbind("touchstart")
+		$("body").unbind("touchmove")
+		if(window["scrollTouchPreventDefault"]&&touchpreventDefaultflag){
+			window["scrollTouchPreventDefault"](father);
+		}
 	};
 	this.init = function(settings) {
 		if($("body").find("." + settings.getfatherid).length < 1) {
@@ -657,11 +683,13 @@ $.fn.shineonScroll = function(options) {
 		this.addElement();
 		this.onmouseclick(settings);
 		this.scrollFunc(window);
-		if((navigator.userAgent.match(/(iPhone|Android|iPad)/i)) || smsboleonclick) {
+		
+		if((navigator.userAgent.match(/(iPhone|Android|iPad|Mobile|uc)/i)) || smsboleonclick) {
 			var listenid = document.getElementById(sf);
 			listenid.addEventListener("touchstart", this.touchStart, false);
 			listenid.addEventListener("touchmove", this.touchMove, false);
 			listenid.addEventListener("touchend", this.touchEnd, false);
+			
 			if(smsboleonclick){
 				if(navigator.userAgent.toLowerCase().match(/firefox/) != null) {
 					document.addEventListener('DOMMouseScroll', this.scrollFunc, false);
