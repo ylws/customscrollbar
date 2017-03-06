@@ -25,7 +25,8 @@ $.fn.shineonScroll = function(options) {
 		"smscrollfnprev": "phone_", //手机端滚动回调方法前缀
 		"touchpreventDefault":false,//是否开启移动端禁用滚动条
 		"boleonclick": false, //触屏设备在终端chrome浏览器,强制转到touch监听,并添加滚轮监听
-		"scrollbottomfn": "topmax" //top值滚动到底部
+		"scrollbottomfn": "topmax", //top值滚动到底部
+		"mousewheelflag":true,//默认开启模拟滚动条滚动，body区域滚动条禁止
 		/*
 			var count = 0;
 			function topmax(scrollobj){
@@ -105,6 +106,7 @@ $.fn.shineonScroll = function(options) {
 		smsboleonclick = settings.boleonclick,
 		smsscrollbottomfn = settings.scrollbottomfn,
 		touchpreventDefault= settings.touchpreventDefault,
+		mousewheelflag  = settings.mousewheelflag,
 		scrolltarget = settings.scrolltarget;
 	if(sms == true || sms == "true") {
 		sms = $("#" + sf + " ." + sonc).height() / $("#" + sf).height() * 5;
@@ -172,9 +174,11 @@ $.fn.shineonScroll = function(options) {
 			idval = $("#" + settings["getfatherid"]).val();
 			settings.wheelxory = $("#" + idval).attr("wheelxory");
 			if(($("#" + idval).height() < $(this).height() && settings.wheelxory == "wheely") ||($("#" + idval).height() > $(this).height() && settings.wheelxory == "wheely" && top.location.href != location.href) || ($("#" + idval).width() < $(this).width() && settings.wheelxory == "wheelx")|| ($("#" + idval).width() > $(this).width() && settings.wheelxory == "wheelx" && top.location.href != location.href)) {
-				document.body.onmousewheel = function() {
-					return false
-				};
+				if(mousewheelflag){
+					document.body.onmousewheel = function() {
+						return false
+					};
+				}
 			} else {
 				document.body.onmousewheel = null;
 			}
@@ -516,9 +520,11 @@ $.fn.shineonScroll = function(options) {
 			funx = ev.pageX||ev.clientX;
 			funy = ev.pageY||ev.clientY;
 			if(($("#" + idval).height() < $(this).height() && settings.wheelxory == "wheely") ||($("#" + idval).height() > $(this).height() && settings.wheelxory == "wheely" && top.location.href != location.href) || ($("#" + idval).width() < $(this).width() && settings.wheelxory == "wheelx")|| ($("#" + idval).width() > $(this).width() && settings.wheelxory == "wheelx" && top.location.href != location.href)) {
-				document.body.onmousewheel = function() {
-					return false
-				};
+				if(mousewheelflag){
+					document.body.onmousewheel = function() {
+						return false
+					};
+				}
 			} else {
 				document.body.onmousewheel = null;
 			}
@@ -526,9 +532,11 @@ $.fn.shineonScroll = function(options) {
 		});
 		sf = $("#" + settings["getfatherid"]).val();
 		if(($("#" + sf).height() < $("#" + sf + " ." + sonc).height() && settings.wheelxory == "wheely") ||($("#" + sf).height() > $("#" + sf + " ." + sonc).height() && settings.wheelxory == "wheely" && top.location.href != location.href) || ($("#" + sf).width() < $("#" + sf + " ." + sonc).width() && settings.wheelxory == "wheelx")||($("#" + sf).width() > $("#" + sf + " ." + sonc).width() && settings.wheelxory == "wheelx" && top.location.href != location.href)) {
-			document.body.onmousewheel = function() {
-				return false
-			};
+			if(mousewheelflag){
+				document.body.onmousewheel = function() {
+					return false
+				};
+			}
 			if(document.getElementById(sf).offsetTop != undefined) {
 				fathery = $("#" + sf).offset()['top'];
 				fatherx = $("#" + sf).offset()['left'];
