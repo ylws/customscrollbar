@@ -26,7 +26,7 @@ $.fn.shineonScroll = function(options) {
 		"touchpreventDefault":false,//是否开启移动端禁用滚动条
 		"boleonclick": false, //触屏设备在终端chrome浏览器,强制转到touch监听,并添加滚轮监听
 		"scrollbottomfn": "topmax", //top值滚动到底部
-		"mousewheelflag":true,//默认开启模拟滚动条滚动，body区域滚动条禁止
+		"mousewheelflag":true//默认开启模拟滚动条滚动，body区域滚动条禁止
 		/*
 			var count = 0;
 			function topmax(scrollobj){
@@ -586,6 +586,7 @@ $.fn.shineonScroll = function(options) {
 				 ev.preventDefault();
 				 ev.stopPropagation();
 			})
+			 ev.preventDefault();
 		}
 		$("#" + settings["getfatherid"]).val($(this).attr("id"));
 		settings.wheelxory = $(this).attr("wheelxory");
@@ -611,7 +612,8 @@ $.fn.shineonScroll = function(options) {
 			 	var ev = window.event || e;
 				 ev.preventDefault();
 				 ev.stopPropagation();
-			})
+			})//解决移动端其他浏览器问题
+			 ev.preventDefault();//解决移动端现代浏览器问题
 		}
 		var touch = ev.touches[0], //获取第一个触点
 			x = Number(touch.pageX), //页面触点X坐标
@@ -623,16 +625,16 @@ $.fn.shineonScroll = function(options) {
 		lastY = y;
 		if(Math.abs(ylength) > Math.abs(xlength)) { //垂直方向
 			if(ylength >= 0) {
-				settings["wheelval"] = 1;
-			} else {
 				settings["wheelval"] = -1;
+			} else {
+				settings["wheelval"] = 1;
 			}
 			_this.scrollings(settings);
 		} else { //水平方向
 			if(xlength >= 0) {
-				settings["wheelval"] = 1;
-			} else {
 				settings["wheelval"] = -1;
+			} else {
+				settings["wheelval"] = 1;
 			}
 			_this.scrollings(settings);
 		}
@@ -648,8 +650,11 @@ $.fn.shineonScroll = function(options) {
 		}
 		$("body").unbind("touchstart")
 		$("body").unbind("touchmove")
-		if(window["scrollTouchPreventDefault"]&&touchpreventDefaultflag){
-			window["scrollTouchPreventDefault"](father);
+		if(window["scrollTouchPreventDefault"]){
+			if(touchpreventDefaultflag){
+				
+				window["scrollTouchPreventDefault"](father);
+			}
 		}
 	};
 	this.init = function(settings) {
